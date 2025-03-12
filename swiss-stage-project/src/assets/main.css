@@ -1,0 +1,32 @@
+@import './base.css';
+@import 'vuetify/styles';
+
+#app {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  font-weight: normal;
+}
+
+body {
+  font-family: "游ゴシック", "メイリオ", "MSゴシック";
+}
+
+.btn {
+  font-family: "游ゴシック", "メイリオ", "MSゴシック";
+}
+
+a,
+.green {
+  text-decoration: none;
+  color: #64dd17;
+  transition: 0.4s;
+  padding: 3px;
+}
+
+@media (hover: hover) {
+  a:hover {
+    background-color: hsla(160, 100%, 37%, 0.2);
+  }
+}
+
