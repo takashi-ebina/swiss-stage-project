@@ -9,11 +9,11 @@
 }
 
 body {
-  font-family: "游ゴシック", "メイリオ", "MSゴシック";
+  font-family: "游ゴシック", "メイリオ", "MSゴシック" !important;;
 }
 
 .btn {
-  font-family: "游ゴシック", "メイリオ", "MSゴシック";
+  font-family: "游ゴシック", "メイリオ", "MSゴシック" !important;;
 }
 
 a,

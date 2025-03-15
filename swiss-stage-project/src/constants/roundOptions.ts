@@ -1,0 +1,8 @@
+import type { Round } from "@/types/round";
+
+export const roundOptions: Round[] = [
+  { value: 1 },
+  { value: 2 },
+  { value: 3 },
+  { value: 4 },
+];

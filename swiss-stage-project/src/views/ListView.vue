@@ -6,23 +6,15 @@ import { usePlayerStore } from "@/stores/playerStore";
 import { usePlayerListStore } from "@/stores/playerListStore";
 import { rankOptions } from '@/constants/rankOptions'
 import { Player } from '@/types/player';
+import { rules } from '@/utils/validatorUtil';
 
 let $PlayerStore = usePlayerStore();
 const $PlayerListStore = usePlayerListStore();
 const $toast = useToast();
 const dialog = ref(false);
 
-const checkLength = (maxLength: number) => {
-  return (value: string) => value.length <= maxLength || `最大 ${maxLength} 文字です`;
-};
-
-const rules = {
-  checkOrganizationLength: checkLength(30),
-  checkNameLength: checkLength(20)
-};
-
 const execRegister = (): void => {
-  dialog.value = false
+  dialog.value = false;
   if (!validatePlayers()) return;
 
   $PlayerListStore.players.sort((a, b) => a.rank.value - b.rank.value);
@@ -36,22 +28,22 @@ const execRegister = (): void => {
   if ($PlayerListStore.players.length % 2 !== 0) {
     $PlayerListStore.players.push({
       id: $PlayerListStore.players.length + 1,
-      organization:"",
+      organization: "",
       name: "dummy",
-      rank: { name: "18級", value: 18 },
+      rank: { name: "20級", value: 20 },
       matches: Array.from({ length: 4 }, () => ({ opponent: "", result: { name: "", value: -1 } })),
       points: 0,
       sos: 0,
       sodos: 0,
       rankingScore: 0,
-      ranking: ""
+      ranking: 0
     });
   }
   // プレイヤーの要素数が 16 未満の場合、空のプレイヤーを追加
   while ($PlayerListStore.players.length < 16) {
     $PlayerListStore.players.push({
       id: $PlayerListStore.players.length + 1,
-      organization:"",
+      organization: "",
       name: "",
       rank: { name: "", value: 99 },
       matches: Array.from({ length: 4 }, () => ({ opponent: "", result: { name: "", value: -1 } })),
@@ -59,7 +51,7 @@ const execRegister = (): void => {
       sos: 0,
       sodos: 0,
       rankingScore: 0,
-      ranking: ""
+      ranking: 0
     });
   }
   $PlayerStore.players = JSON.parse(JSON.stringify($PlayerListStore.players));
@@ -87,19 +79,17 @@ const validatePlayers = (): boolean => {
         <h2>参加者リスト</h2>
       </v-col>
       <v-col cols="2">
-        <v-btn 
-          class="register-botton bg-light-green-accent-4 text-white text-body-1 ma-1 pa-4"
-          block
+        <v-btn class="register-botton bg-light-green-accent-4 text-white text-body-1 ma-1 pa-4" block
           @click="dialog = true">
           参加者の登録
         </v-btn>
       </v-col>
       <v-dialog v-model="dialog" width="auto">
-        <v-card max-width="500">
+        <v-card width="500">
           <v-card-title class="daialog-title">参加者の登録</v-card-title>
           <v-card-text>
             対戦表の結果がリセットされますが問題ないですか？
-          </v-card-text>        
+          </v-card-text>
           <template v-slot:actions>
             <v-btn text="キャンセル" @click="dialog = false"></v-btn>
             <v-btn text="Ok" @click="execRegister()"></v-btn>
@@ -117,36 +107,21 @@ const validatePlayers = (): boolean => {
         </tr>
       </thead>
       <tbody class="table-body">
-        <tr v-for="(player, index) in $PlayerListStore.players" :key="player.id" >
+        <tr v-for="(player, index) in $PlayerListStore.players" :key="player.id">
           <td>{{ index + 1 }}</td>
           <td>
-            <v-text-field 
-              v-model="player.organization"
-              variant="underlined" 
-              density="compact"
-              maxlength="30"
+            <v-text-field v-model="player.organization" variant="underlined" density="compact" maxlength="30"
               :rules="[rules.checkOrganizationLength]">
             </v-text-field>
           </td>
           <td>
-            <v-text-field 
-              v-model="player.name"
-              variant="underlined" 
-              density="compact"
-              maxlength="20"
+            <v-text-field v-model="player.name" variant="underlined" density="compact" maxlength="20"
               :rules="[rules.checkNameLength]">
             </v-text-field>
           </td>
           <td>
-            <v-select
-              v-model="player.rank"
-              :items="rankOptions"
-              item-title="name"
-              item-value="rank"
-              variant="underlined"
-              return-object
-              density="compact"
-            >
+            <v-select v-model="player.rank" :items="rankOptions" item-title="name" item-value="rank"
+              variant="underlined" return-object density="compact">
             </v-select>
           </td>
         </tr>
@@ -156,10 +131,10 @@ const validatePlayers = (): boolean => {
 </template>
 
 <style>
-
 @media print {
   .register-botton {
-    display: none !important;;
+    display: none !important;
+    ;
   }
 }
 
@@ -173,7 +148,7 @@ const validatePlayers = (): boolean => {
 }
 
 .table-header th {
-  position:sticky;
+  position: sticky;
   top: 0;
   z-index: 2;
   padding: .5em;
@@ -185,7 +160,7 @@ const validatePlayers = (): boolean => {
 
 .table-body th,
 .table-body td {
-  white-space:nowrap;
+  white-space: nowrap;
   padding: .01em .5em;
 }
 

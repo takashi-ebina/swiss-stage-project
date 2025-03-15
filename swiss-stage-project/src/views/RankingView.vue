@@ -5,8 +5,8 @@ import { usePlayerStore } from "@/stores/playerStore";
 const $PlayerStore = usePlayerStore();
 
 const filteredPlayers = computed(() => {
-  const rankingSortedPlayers = $PlayerStore.players.slice();
-   rankingSortedPlayers.sort((a, b) => b.rankingScore - a.rankingScore);
+  const rankingSortedPlayers = $PlayerStore.players.slice().filter((player) => player.name !== "");
+  rankingSortedPlayers.sort((a, b) => b.rankingScore - a.rankingScore);
   return rankingSortedPlayers;
 })
 
@@ -31,24 +31,38 @@ function getResultClass(result) {
         <h2>ランキング</h2>
       </v-col>
     </v-row>
-    <div class="ranking-container">
-      <div class="top-ranking">
-        <div class="rank" :class="getResultClass(index + 1)" v-for="(player, index) in filteredPlayers.filter((_, i) => i <= 2)" :key="player.id">
-          <span class="rank-number">👑 {{ index + 1 }}位: </span>
-          <span class="rank-name">{{ player.name }}</span>
+
+    <template v-if="filteredPlayers.length > 0">
+      <div class="ranking-container">
+        <div class="top-ranking">
+          <div class="rank" :class="getResultClass(index + 1)"
+            v-for="(player, index) in filteredPlayers.filter((_, i) => i <= 2)" :key="player.id">
+            <span class="rank-number">👑 {{ index + 1 }}位: </span>
+            <span class="rank-name">{{ player.name }}</span>
+          </div>
+        </div>
+        <div class="other-ranking">
+          <div class="rank" v-for="(player, index) in filteredPlayers.filter((_, i) => i > 2)" :key="player.id">
+            <span class="rank-number">{{ index + 4 }}位: </span>
+            <span class="rank-name">{{ player.name }}</span>
+          </div>
         </div>
       </div>
-      <div class="other-ranking">
-        <div class="rank" v-for="(player, index) in filteredPlayers.filter((_, i) => i > 2)" :key="player.id">
-          <span class="rank-number">{{ index + 4 }}位: </span>
-          <span class="rank-name">{{ player.name }}</span>
-        </div>
+    </template>
+    <template v-else>
+      <div class="d-flex align-center justify-center">
+        <v-sheet :elevation="3" :height="300" :width="1000" border rounded
+          class="d-flex align-center justify-center text-h3"> 参加者を登録してください</v-sheet>
       </div>
-    </div>
+    </template>
   </div>
 </template>
 
 <style>
+.text-h3 {
+  font-family: "游ゴシック", "メイリオ", "MSゴシック" !important;
+}
+
 .ranking-container {
   display: flex;
   background: #FFF;
@@ -99,12 +113,14 @@ function getResultClass(result) {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
+
   .silver {
     background-color: #c0c0c0 !important;
     background-image: linear-gradient(90deg, #c0c0c0, #dcdcdc) !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
+
   .bronze {
     background-color: #cd7f32 !important;
     background-image: linear-gradient(90deg, #cd7f32, #b87333) !important;
@@ -112,6 +128,7 @@ function getResultClass(result) {
     print-color-adjust: exact !important;
   }
 }
+
 /* 1位、2位、3位ごとに遅延を加える */
 .gold {
   background: linear-gradient(90deg, #ffd700, #ffcc00);

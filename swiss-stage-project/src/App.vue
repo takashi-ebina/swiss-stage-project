@@ -4,12 +4,18 @@ import Header from './components/Header.vue'
 </script>
 
 <template>
-  <Header title="swiss-stage-project" />
+  <Header defaultTitle="swiss-stage-project" defaultLogoName="igo" />
   <div>
     <nav>
-      <RouterLink to="/">Home</RouterLink>
-      <RouterLink to="/list">List</RouterLink>
-      <RouterLink to="/ranking">Ranking</RouterLink>
+      <RouterLink to="/">
+        <v-icon class="mr-2">mdi-home</v-icon> Home
+      </RouterLink>
+      <RouterLink to="/list">
+        <v-icon class="mr-2">mdi-format-list-bulleted</v-icon> List
+      </RouterLink>
+      <RouterLink to="/ranking">
+        <v-icon class="mr-2">mdi-trophy</v-icon> Ranking
+      </RouterLink>
     </nav>
   </div>
   <RouterView />
