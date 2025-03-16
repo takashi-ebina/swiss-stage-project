@@ -25,10 +25,14 @@ jobs:
         run: yarn install
         working-directory: ./swiss-stage-project
 
+      - name: Change to project directory
+        run: |
+          pwd
+          cd ./swiss-stage-project
+
       - name: Build/release Electron app
         uses: samuelmeuli/action-electron-builder@v1
         with:
-          path: ./swiss-stage-project
           github_token: ${{ secrets.github_token }}
           release: ${{ startsWith(github.ref, 'refs/tags/v') }}
         env:
