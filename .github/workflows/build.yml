@@ -22,7 +22,6 @@ jobs:
           node-version: 20
 
       - name: Build/release Electron app
-        working-directory: swiss-stage-project
         uses: samuelmeuli/action-electron-builder@v1
         with:
           github_token: ${{ secrets.github_token }}
