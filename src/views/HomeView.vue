@@ -3,19 +3,23 @@ import { ref, watch } from 'vue'
 import { usePlayerStore } from "@/stores/playerStore";
 import { resultOptions } from "@/constants/resultOptions";
 import { roundOptions } from "@/constants/roundOptions";
+import type { Result } from "@/types/result";
+import type { Match } from "@/types/match";
+import type { Player } from "@/types/player";
+import type { Round } from "@/types/round";
 
 const $PlayerStore = usePlayerStore();
-const selectedRound = ref(1);
+const selectedRound = ref<Round>({ value: 1 });
 
 watch($PlayerStore.players, (newPlayers, oldPlayers) => {
   newPlayers.forEach((player, index) => {
     player.sos = player.matches
-      .filter((matche) => matche.opponent !== "" && matche.opponent !== -99)
-      .map((matche) => newPlayers[matche.opponent - 1].points)
+      .filter((matche) => matche.opponent !== "" && matche.opponent !== "-99")
+      .map((matche) => newPlayers[parseInt(matche.opponent) - 1].points)
       .reduce((sum, points) => sum + points, 0);
     player.sodos = player.matches
-      .filter((matche) => matche.opponent !== "" && matche.opponent !== -99)
-      .map((matche) => newPlayers[matche.opponent - 1].sos)
+      .filter((matche) => matche.opponent !== "" && matche.opponent !== "-99")
+      .map((matche) => newPlayers[parseInt(matche.opponent) - 1].sos)
       .reduce((sum, sos) => sum + sos, 0);
     player.rankingScore = (player.points * 1000000) + (player.sos * 1000) + (player.sodos * 2);
     const tmpPlayers = newPlayers.slice();
@@ -26,7 +30,7 @@ watch($PlayerStore.players, (newPlayers, oldPlayers) => {
   { deep: true }
 );
 
-function getResultClass(result) {
+function getResultClass(result: Result) {
   if (!result.name) return "";
   switch (result.value) {
     case 1:
@@ -43,42 +47,43 @@ function getResultClass(result) {
 function execMatch() {
   for (const player of $PlayerStore.players) {
     if (player.name.trim() === "") break;
-    if (player.matches[selectedRound.value - 1].opponent !== "") continue;
+    if (player.matches[selectedRound.value.value - 1].opponent !== "") continue;
     const points = player.points;
-    player.matches[selectedRound.value - 1].opponent = -99;
-    const tmpPlayers = selectedRound.value % 2 !== 0 ? $PlayerStore.players : [...$PlayerStore.players].reverse();
+    player.matches[selectedRound.value.value - 1].opponent = "-99";
+    const tmpPlayers = selectedRound.value.value % 2 !== 0 ? $PlayerStore.players : [...$PlayerStore.players].reverse();
     for (const opponentPlayer of tmpPlayers) {
       if (player.id === opponentPlayer.id
         || opponentPlayer.name.trim() === ""
-        || existsOpponent(opponentPlayer, selectedRound.value)
-        || isAlreadyMatch(player, opponentPlayer, selectedRound.value)) {
+        || existsOpponent(opponentPlayer, selectedRound.value.value)
+        || isAlreadyMatch(player, opponentPlayer, selectedRound.value.value)) {
         continue;
       }
       const opponentPoints = opponentPlayer.points;
       const tmp = Math.abs(points - opponentPoints);
       if (tmp >= 0 && tmp <= 0.5) {
-        player.matches[selectedRound.value - 1].opponent = opponentPlayer.id;
-        opponentPlayer.matches[selectedRound.value - 1].opponent = player.id;
+        player.matches[selectedRound.value.value - 1].opponent = opponentPlayer.id.toString();
+        opponentPlayer.matches[selectedRound.value.value - 1].opponent = player.id.toString();
         break;
       }
     }
   }
 }
 
-function existsOpponent(opponentPlayer, currentRound): boolean {
+
+function existsOpponent(opponentPlayer: Player, currentRound: number): boolean {
   return opponentPlayer.matches[currentRound - 1].opponent !== "";
 }
 
-function isAlreadyMatch(player, opponentPlayer, currentRound): boolean {
+function isAlreadyMatch(player: Player, opponentPlayer: Player, currentRound: number): boolean {
   for (let i = currentRound; i >= 1; i--) {
-    if (player.matches[i - 1].opponent === opponentPlayer.id) {
+    if (parseInt(player.matches[i - 1].opponent) === opponentPlayer.id) {
       return true;
     }
   }
   return false;
 }
 
-function onResultChange(match, round, ownPlayerIndex, event) {
+function onResultChange(match: Match, round: number, ownPlayerIndex: number) {
   if (match.opponent === "") return;
   const opponentIndex = parseInt(match.opponent) - 1;
   if (match.result?.value === 1) {
@@ -153,7 +158,7 @@ function onResultChange(match, round, ownPlayerIndex, event) {
             <td class="home-table-body-matches-result" :class="getResultClass(match.result)">
               <v-select v-model="match.result" :items="resultOptions" item-title="name" item-value="value"
                 variant="underlined" return-object density="compact"
-                @update:modelValue="onResultChange(match, round, index, $event)">
+                @update:modelValue="onResultChange(match, round, index)">
               </v-select>
             </td>
           </template>

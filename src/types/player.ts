@@ -1,4 +1,4 @@
-import type { Matche } from '@/types/matche';
+import type { Match } from '@/types/match';
 import type { Rank } from '@/types/rank';
 
 export class Player {
@@ -6,7 +6,7 @@ export class Player {
     organization: string;
     name: string;
     rank: Rank;
-    matches: Matche[];
+    matches: Match[];
     points: number;
     sos: number;
     sodos: number;

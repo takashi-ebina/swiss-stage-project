@@ -10,7 +10,7 @@ const filteredPlayers = computed(() => {
   return rankingSortedPlayers;
 })
 
-function getResultClass(result) {
+function getResultClass(result: number) {
   if (!result) return "";
   switch (result) {
     case 1:
