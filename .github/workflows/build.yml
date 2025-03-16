@@ -29,6 +29,7 @@ jobs:
         run: |
           pwd
           cd ./swiss-stage-project
+          ls -ltr
 
       - name: Build/release Electron app
         uses: samuelmeuli/action-electron-builder@v1
