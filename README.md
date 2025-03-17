@@ -2,6 +2,17 @@
 
 スイス方式トーナメントの対戦組み合わせを作成するツール
 
+## 画面イメージ
+
+### 対戦表
+![対戦表](https://github.com/user-attachments/assets/96b00427-9d37-4f62-ace1-5323bc2c66e7)
+
+### 参加者リスト
+![参加者リスト](https://github.com/user-attachments/assets/78ddf75c-4690-4df2-82bc-6ae62b29d4bd)
+
+### ランキング
+![ランキング](https://github.com/user-attachments/assets/43223512-6ada-463c-ae9d-363a2ab6af38)
+
 ## 組み合わせ方法
 
 1. 1回戦は抽選で決めた番号順に組み合わせる
