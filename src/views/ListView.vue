@@ -97,16 +97,16 @@ const validatePlayers = (): boolean => {
         </v-card>
       </v-dialog>
     </v-row>
-    <table class="table-design">
-      <thead class="table-header">
+    <table class="list-table-design">
+      <thead class="list-table-header">
         <tr>
-          <th class="table-header-no">No</th>
-          <th class="table-header-organization">所属</th>
-          <th class="table-header-name">名前</th>
-          <th class="table-header-rank">段級位</th>
+          <th class="list-table-header-no">No</th>
+          <th class="list-table-header-organization">所属</th>
+          <th class="list-table-header-name">名前</th>
+          <th class="list-table-header-rank">段級位</th>
         </tr>
       </thead>
-      <tbody class="table-body">
+      <tbody class="list-table-body">
         <tr v-for="(player, index) in $PlayerListStore.players" :key="player.id">
           <td>{{ index + 1 }}</td>
           <td>
@@ -134,23 +134,25 @@ const validatePlayers = (): boolean => {
 @media print {
   .register-botton {
     display: none !important;
-    ;
   }
 }
 
-.table-design {
+.list-table-design {
+  /* テーブルのヘッダーを固定にするために、テーブル内のセルの境界を分離 */
   border-collapse: separate;
+  /* テーブルにおける隣り合うセルの境界同士の間隔 */
   border-spacing: 0;
+  /* テーブルの列幅は固定 */
   table-layout: fixed;
-  font-weight: bold;
   text-align: center;
   margin: auto;
 }
 
-.table-header th {
+.list-table-header th {
+  /* ヘッダーを画面上部の位置で固定 */
   position: sticky;
   top: 0;
-  z-index: 2;
+  z-index: 1;
   padding: .5em;
   border-top: 2px solid #64dd17;
   border-bottom: 2px solid #64dd17;
@@ -158,25 +160,26 @@ const validatePlayers = (): boolean => {
   background-color: #fff;
 }
 
-.table-body th,
-.table-body td {
+.list-table-body th,
+.list-table-body td {
+  /* ホワイトスペースを統合するが、行は折り返さない */
   white-space: nowrap;
   padding: .01em .5em;
 }
 
-.table-header-no {
+.list-table-header-no {
   width: 10px;
 }
 
-.table-header-organization {
+.list-table-header-organization {
   width: 400px;
 }
 
-.table-header-name {
+.list-table-header-name {
   width: 400px;
 }
 
-.table-header-rank {
+.list-table-header-rank {
   width: 100px;
 }
 

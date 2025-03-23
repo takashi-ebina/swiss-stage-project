@@ -181,17 +181,7 @@ function onResultChange(match: Match, round: number, ownPlayerIndex: number) {
 </template>
 
 <style>
-h2 {
-  display: flex;
-  /* アイテムを行または列に並べるための1次元のレイアウト */
-  gap: 1rem;
-  /* 要素間の間隔を設定 */
-  width: 100%;
-  place-items: center;
-}
-
 @media print {
-
   .setting-botton,
   .round-select {
     display: none !important;
@@ -199,19 +189,22 @@ h2 {
 }
 
 .home-table-design {
+  /* テーブルのヘッダーを固定にするために、テーブル内のセルの境界を分離 */
   border-collapse: separate;
+  /* テーブルにおける隣り合うセルの境界同士の間隔 */
   border-spacing: 0;
+  /* テーブルの列幅は固定 */
   table-layout: fixed;
   min-width: 700px;
-  font-weight: bold;
   text-align: center;
   margin: auto;
 }
 
 .home-table-header th {
+  /* ヘッダーを画面上部の位置で固定 */
   position: sticky;
   top: 0;
-  z-index: 2;
+  z-index: 1;
   padding: .5em;
   border-top: 2px solid #64dd17;
   border-bottom: 2px solid #64dd17;
@@ -220,20 +213,20 @@ h2 {
 }
 
 .home-table-header-match {
-  top: 2.85em !important;
-  border-top: none !important;
   /* 線の重なりを防ぐ */
+  border-top: none !important;
+  top: 2.85em !important;
 }
 
 .home-table-body th,
 .home-table-body td {
+  /* ホワイトスペースを統合するが、行は折り返さない */
   white-space: nowrap;
   padding: .01em .5em;
 }
 
 .home-table-body-name {
   width: 150px;
-  word-break: break-word;
 }
 
 .home-table-body-match-no {
@@ -250,16 +243,13 @@ h2 {
 
 .result-win {
   background-color: rgba(0, 255, 0, 0.2);
-  /* 緑 */
 }
 
 .result-lose {
   background-color: rgba(255, 0, 0, 0.2);
-  /* 赤 */
 }
 
 .result-draw {
   background-color: rgba(255, 255, 0, 0.2);
-  /* 黄色 */
 }
 </style>
