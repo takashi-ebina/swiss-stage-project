@@ -10,6 +10,8 @@
 
 ※`x.x.x`はバージョン番号
 
+ダウンロードした`swiss-stage-project-Setup-x.x.x.exe`をダブルクリック後、Desktopに`swiss-stage-project.exe`のショートカットファイルが作成されます
+
 ### [v1.0.0](https://github.com/takashi-ebina/swiss-stage-project/releases/tag/v1.0.0)
 
 ## 画面
