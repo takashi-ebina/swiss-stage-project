@@ -2,7 +2,8 @@
 name: 機能要望
 about: プロジェクトに機能を要望する
 title: "[FEATURE] 機能名"
-labels: feature
+labels: 1.feature
+projects: "takashi-ebina/3"
 assignees: takashi-ebina
 ---
 
@@ -12,14 +13,11 @@ assignees: takashi-ebina
 
 ## 背景
 
-この機能を追加する背景（ユーザーにどういうメリットが有るか)を明確かつ簡潔に説明してください。
+この機能を追加する背景（ユーザーにどういうメリットが有るか）を明確かつ簡潔に説明してください。
 
-## Story
+## タスク
 
-```tasklist
-## STORY
-- [ ] 
-```
+- [ ] 必要なタスクを記載してください。
 
 ## 課題・検討・補足
 
