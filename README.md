@@ -14,6 +14,8 @@
 
 ### [v1.0.0](https://github.com/takashi-ebina/swiss-stage-project/releases/tag/v1.0.0)
 
+- 初回リリース
+
 ## 画面
 
 ### 対戦表
