@@ -12,10 +12,20 @@
 
 ダウンロードした`swiss-stage-project-Setup-x.x.x.exe`をダブルクリック後、Desktopに`swiss-stage-project.exe`のショートカットファイルが作成されます
 
+<details>
+
+<summary>Install Version</summary>
+
+### [v1.0.1](https://github.com/takashi-ebina/swiss-stage-project/releases/tag/v1.0.1)
+
+- 軽微な修正
+
 ### [v1.0.0](https://github.com/takashi-ebina/swiss-stage-project/releases/tag/v1.0.0)
 
 - 初回リリース
 
+</details>
+  
 ## 画面
 
 ### 対戦表
