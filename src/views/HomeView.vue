@@ -162,7 +162,7 @@ const onResultChange = (match: Match, currentRound: number, ownPlayerIndex: numb
           </template>
           <th rowspan="2">勝点</th>
           <th rowspan="2">SOS</th>
-          <th rowspan="2">SOSOS</th>
+          <th rowspan="2">SODOS</th>
           <th rowspan="2">順位</th>
         </tr>
         <tr>
