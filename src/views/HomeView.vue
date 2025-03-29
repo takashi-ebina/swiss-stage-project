@@ -3,23 +3,24 @@ import { ref, watch } from 'vue'
 import { usePlayerStore } from "@/stores/playerStore";
 import { resultOptions } from "@/constants/resultOptions";
 import { roundOptions } from "@/constants/roundOptions";
-import type { Result } from "@/types/result";
-import type { Match } from "@/types/match";
-import type { Player } from "@/types/player";
+import { Player } from "@/models/player";
+import { Result } from "@/models/result";
+import { Match } from "@/models/match";
 import type { Round } from "@/types/round";
 
+const OPPONENT_PLAYER_NO_MATCH :string = "-99";
 const $PlayerStore = usePlayerStore();
 const selectedRound = ref<Round>({ value: 1 });
 
 watch($PlayerStore.players, (newPlayers, oldPlayers) => {
   newPlayers.forEach((player, index) => {
     player.sos = player.matches
-      .filter((matche) => matche.opponent !== "" && matche.opponent !== "-99")
-      .map((matche) => newPlayers[parseInt(matche.opponent) - 1].points)
+      .filter((match) => match.opponent !== "" && match.opponent !== OPPONENT_PLAYER_NO_MATCH)
+      .map((match) => newPlayers[parseInt(match.opponent) - 1].points)
       .reduce((sum, points) => sum + points, 0);
     player.sodos = player.matches
-      .filter((matche) => matche.opponent !== "" && matche.opponent !== "-99")
-      .map((matche) => newPlayers[parseInt(matche.opponent) - 1].sos)
+      .filter((match) => match.opponent !== "" && match.opponent !== OPPONENT_PLAYER_NO_MATCH)
+      .map((match) => newPlayers[parseInt(match.opponent) - 1].sos)
       .reduce((sum, sos) => sum + sos, 0);
     player.rankingScore = (player.points * 1000000) + (player.sos * 1000) + (player.sodos * 2);
     const tmpPlayers = newPlayers.slice();
@@ -30,7 +31,12 @@ watch($PlayerStore.players, (newPlayers, oldPlayers) => {
   { deep: true }
 );
 
-function getResultClass(result: Result) {
+/**
+ * 勝敗の結果に対応したクラス名を返却する
+ * @param {Result} result 勝敗の結果
+ * @returns {string} クラス名
+ */
+const getResultClass = (result: Result): string => {
   if (!result.name) return "";
   switch (result.value) {
     case 1:
@@ -44,23 +50,28 @@ function getResultClass(result: Result) {
   }
 }
 
-function execMatch() {
+/**
+ * セレクトボックスで選択した回戦に対して、対戦相手をマッチさせる
+ */
+const setOpponent = (): void => {
   for (const player of $PlayerStore.players) {
     if (player.name.trim() === "") break;
-    if (player.matches[selectedRound.value.value - 1].opponent !== "") continue;
-    const points = player.points;
-    player.matches[selectedRound.value.value - 1].opponent = "-99";
+    if (hasOpponentInRound(player, selectedRound.value.value)) continue;
+    // いったん仮で-99を設定する
+    player.matches[selectedRound.value.value - 1].opponent = OPPONENT_PLAYER_NO_MATCH;
+    // 毎回、Noの昇順で対戦相手を探すと、組み合わせに偏りが出そうなので、
+    // 偶数の回戦の場合はNoの降順で対戦相手を探すようにしているが意味あるかはわからない・・
     const tmpPlayers = selectedRound.value.value % 2 !== 0 ? $PlayerStore.players : [...$PlayerStore.players].reverse();
     for (const opponentPlayer of tmpPlayers) {
       if (player.id === opponentPlayer.id
         || opponentPlayer.name.trim() === ""
-        || existsOpponent(opponentPlayer, selectedRound.value.value)
-        || isAlreadyMatch(player, opponentPlayer, selectedRound.value.value)) {
+        || hasOpponentInRound(opponentPlayer, selectedRound.value.value)
+        || hasAlreadyMatched(player, opponentPlayer, selectedRound.value.value)) {
         continue;
       }
-      const opponentPoints = opponentPlayer.points;
-      const tmp = Math.abs(points - opponentPoints);
-      if (tmp >= 0 && tmp <= 0.5) {
+      const pointsDifference = Math.abs(player.points -  opponentPlayer.points);
+      if (pointsDifference >= 0 && pointsDifference <= 0.5) {
+        // お互いの勝ち点の差が0.5点以内の場合、対戦相手としてマッチさせる
         player.matches[selectedRound.value.value - 1].opponent = opponentPlayer.id.toString();
         opponentPlayer.matches[selectedRound.value.value - 1].opponent = player.id.toString();
         break;
@@ -69,12 +80,24 @@ function execMatch() {
   }
 }
 
-
-function existsOpponent(opponentPlayer: Player, currentRound: number): boolean {
-  return opponentPlayer.matches[currentRound - 1].opponent !== "";
+/**
+ * 選択した回戦において、既に対戦相手が設定されているか
+ * @param {Player} player プレイヤー
+ * @param {number} selectedRound 選択した回戦
+ * @returns {boolean} 既に対戦相手が設定されている場合はtrue、それ以外の場合はfalseを返却する
+ */
+const hasOpponentInRound = (player: Player, selectedRound: number): boolean => {
+  return player.matches[selectedRound - 1].opponent !== "";
 }
 
-function isAlreadyMatch(player: Player, opponentPlayer: Player, currentRound: number): boolean {
+/**
+ * 既に対戦したことある相手であるか
+ * @param {Player} player プレイヤー
+ * @param {Player} opponentPlayer 対戦相手
+ * @param {number} currentRound 現在の回戦
+ * @returns {boolean} 既に対戦したことがある場合はtrue、それ以外の場合はfalseを返却する
+ */
+const hasAlreadyMatched = (player: Player, opponentPlayer: Player, currentRound: number): boolean => {
   for (let i = currentRound; i >= 1; i--) {
     if (parseInt(player.matches[i - 1].opponent) === opponentPlayer.id) {
       return true;
@@ -83,26 +106,29 @@ function isAlreadyMatch(player: Player, opponentPlayer: Player, currentRound: nu
   return false;
 }
 
-function onResultChange(match: Match, round: number, ownPlayerIndex: number) {
+/**
+ * プレイヤーの対戦結果を更新した後に呼ばれる処理
+ * 対戦相手の結果の更新とプレイヤー、対戦相手の勝ち点の更新を行う
+ * @param {Match} match 試合
+ * @param {number} currentRound 現在の回戦
+ * @param {number} ownPlayerIndex プレイヤーのインデックス
+ */
+const onResultChange = (match: Match, currentRound: number, ownPlayerIndex: number): void => {
   if (match.opponent === "") return;
-  const opponentIndex = parseInt(match.opponent) - 1;
-  if (match.result?.value === 1) {
-    $PlayerStore.players[opponentIndex].matches[round].result = { name: "負", value: 0 };
-  } else if (match.result?.value === 0) {
-    $PlayerStore.players[opponentIndex].matches[round].result = { name: "勝", value: 1 };
-  } else if (match.result?.value === 0.5) {
-    $PlayerStore.players[opponentIndex].matches[round].result = { name: "ジゴ", value: 0.5 };
-  }
-  $PlayerStore.players[opponentIndex].points =
-    $PlayerStore.players[opponentIndex].matches
-      .filter((matche) => matche.result.name !== "")
-      .map((matche) => matche.result.value)
-      .reduce((sum, resultValue) => sum + resultValue, 0);
-  $PlayerStore.players[ownPlayerIndex].points =
-    $PlayerStore.players[ownPlayerIndex].matches
-      .filter((matche) => matche.result.name !== "")
-      .map((matche) => matche.result.value)
-      .reduce((sum, resultValue) => sum + resultValue, 0);
+  const player = $PlayerStore.players[ownPlayerIndex];
+  const opponentPlayer = $PlayerStore.players[parseInt(match.opponent) - 1];
+  // 対戦相手の結果の更新
+  opponentPlayer.matches[currentRound].result = match.result.getOpponentResult();
+
+  // プレイヤー、対戦相手の勝ち点の更新
+  opponentPlayer.points = opponentPlayer.matches
+    .filter((match) => match.result.name !== "")
+    .map((match) => match.result.value)
+    .reduce((sum, resultValue) => sum + resultValue, 0);
+  player.points = player.matches
+    .filter((match) => match.result.name !== "")
+    .map((match) => match.result.value)
+    .reduce((sum, resultValue) => sum + resultValue, 0);
 }
 
 </script>
@@ -114,7 +140,7 @@ function onResultChange(match: Match, round: number, ownPlayerIndex: number) {
         <h2>対戦表</h2>
       </v-col>
       <v-col cols="2">
-        <v-btn class="setting-botton bg-light-green-accent-4 text-white text-body-1 ma-1 pa-4" block @click="execMatch">
+        <v-btn class="setting-botton bg-light-green-accent-4 text-white text-body-1 ma-1 pa-4" block @click="setOpponent">
           対戦相手の設定
         </v-btn>
       </v-col>

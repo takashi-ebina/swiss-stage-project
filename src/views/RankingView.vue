@@ -1,18 +1,22 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { computed } from 'vue'
 import { usePlayerStore } from "@/stores/playerStore";
 
 const $PlayerStore = usePlayerStore();
-
 const filteredPlayers = computed(() => {
   const rankingSortedPlayers = $PlayerStore.players.slice().filter((player) => player.name !== "");
   rankingSortedPlayers.sort((a, b) => b.rankingScore - a.rankingScore);
   return rankingSortedPlayers;
 })
 
-function getResultClass(result: number) {
-  if (!result) return "";
-  switch (result) {
+/**
+ * 順位に応じたクラス名を返却する
+ * @param {number} ranking 勝敗の結果
+ * @returns {string} クラス名
+ */
+function getResultClass(ranking: number) {
+  if (!ranking) return "";
+  switch (ranking) {
     case 1:
       return "gold";
     case 2:
