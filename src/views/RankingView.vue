@@ -1,18 +1,22 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { computed } from 'vue'
 import { usePlayerStore } from "@/stores/playerStore";
 
 const $PlayerStore = usePlayerStore();
-
 const filteredPlayers = computed(() => {
   const rankingSortedPlayers = $PlayerStore.players.slice().filter((player) => player.name !== "");
   rankingSortedPlayers.sort((a, b) => b.rankingScore - a.rankingScore);
   return rankingSortedPlayers;
 })
 
-function getResultClass(result: number) {
-  if (!result) return "";
-  switch (result) {
+/**
+ * 順位に応じたクラス名を返却する
+ * @param {number} ranking 勝敗の結果
+ * @returns {string} クラス名
+ */
+function getResultClass(ranking: number) {
+  if (!ranking) return "";
+  switch (ranking) {
     case 1:
       return "gold";
     case 2:
@@ -64,16 +68,18 @@ function getResultClass(result: number) {
 }
 
 .ranking-container {
+  /* 横並び */
   display: flex;
+  flex-direction: row;
   background: #FFF;
   padding: 20px;
 }
 
-/* 左側（上位3名） */
 .top-ranking {
-  width: 60%;
+  /* 縦並び */
   display: flex;
   flex-direction: column;
+  width: 60%;
   gap: 20px;
   padding: 10px;
 }
@@ -81,28 +87,31 @@ function getResultClass(result: number) {
 /* フェードインアニメーション */
 @keyframes fadeIn {
   from {
+    /* 透明 */
     opacity: 0;
     transform: translateY(-20px);
   }
 
   to {
+    /* 不透明 */
     opacity: 1;
     transform: translateY(0);
   }
 }
 
-/* 1位、2位、3位のスタイルとアニメーション */
 .top-ranking .rank {
+  /* 横並び */
   display: flex;
-  align-items: center;
+  flex-direction: row;
+  /* 両端揃え */
   justify-content: space-between;
   font-size: 28px;
   font-weight: bold;
   padding: 30px;
   border-radius: 10px;
   color: #222;
-  opacity: 0;
   /* 最初は非表示 */
+  opacity: 0;
   animation: fadeIn 1s ease-out forwards;
 }
 
@@ -129,37 +138,35 @@ function getResultClass(result: number) {
   }
 }
 
-/* 1位、2位、3位ごとに遅延を加える */
 .gold {
   background: linear-gradient(90deg, #ffd700, #ffcc00);
-  animation-delay: 0.3s;
-  /* 1位は最初に表示 */
+  animation-delay: 0.1s!important;
 }
 
 .silver {
   background: linear-gradient(90deg, #c0c0c0, #dcdcdc);
-  animation-delay: 0.6s;
-  /* 2位は少し遅れる */
+  animation-delay: 0.3s!important;
 }
 
 .bronze {
   background: linear-gradient(90deg, #cd7f32, #b87333);
-  animation-delay: 0.9s;
-  /* 3位はさらに遅れる */
+  animation-delay: 0.5s!important;
 }
 
-/* 右側（4位～10位） */
 .other-ranking {
-  width: 40%;
+  /* 縦並び */
   display: flex;
   flex-direction: column;
-  padding: 10px;
+  width: 40%;
   gap: 5px;
+  padding: 10px;
 }
 
 .other-ranking .rank {
+  /* 横並び */
   display: flex;
-  align-items: center;
+  flex-direction: row;
+  /* 両端揃え */
   justify-content: space-between;
   font-size: 16px;
   padding: 8px;

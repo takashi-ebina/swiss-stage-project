@@ -60,13 +60,16 @@ const execPrint = (): void => {
 
 <style scoped>
 header {
-  display: flex; /* アイテムを行または列に並べるための1次元のレイアウト */
-  gap: 1rem;     /* 要素間の間隔を設定 */
+  /* 横並び */
+  display: flex;
+  flex-direction: row;
+  /* 縦・横方向の中央揃え */
+  place-items: center;
+  gap: 1rem;
   width: 100%;
   height: 70px;
   border-bottom: solid;
   border-bottom-color: #999;
-  place-items: center;
 }
 
 .title {
@@ -94,13 +97,15 @@ header {
 }
 
 .image-container {
-    display: flex;
-    justify-content: space-around; /* 子要素を均等に配置します */
-    align-items: center; /* 子要素を縦方向の中心に揃えます */
+  /* 横並び */
+  display: flex;
+  flex-direction: row;
+  /* 均等に配置 */
+  justify-content: space-around;
 }
 
 .image-container img {
-    max-width: 30%; /* 画像の最大幅を設定します */
-    height: auto; /* 画像の縦横比を維持します */
+  max-width: 30%;
+  height: auto;
 }
 </style>

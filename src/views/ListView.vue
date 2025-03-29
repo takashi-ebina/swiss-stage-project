@@ -5,7 +5,7 @@ import { useToast } from 'vue-toast-notification';
 import { usePlayerStore } from "@/stores/playerStore";
 import { usePlayerListStore } from "@/stores/playerListStore";
 import { rankOptions } from '@/constants/rankOptions'
-import { Player } from '@/types/player';
+import { Player } from '@/models/player';
 import { rules } from '@/utils/validatorUtil';
 
 let $PlayerStore = usePlayerStore();
@@ -13,7 +13,10 @@ const $PlayerListStore = usePlayerListStore();
 const $toast = useToast();
 const dialog = ref(false);
 
-const execRegister = (): void => {
+/**
+ * プレイヤーの一覧を登録する
+ */
+const registerPlayers = (): void => {
   dialog.value = false;
   if (!validatePlayers()) return;
 
@@ -21,43 +24,25 @@ const execRegister = (): void => {
 
   // IDを振り直し、不要なプレイヤーを削除
   $PlayerListStore.players = $PlayerListStore.players
-    .map((player, index) => (Player.create({ ...player, id: index + 1 })))
+    .map((player, index) => player.updatePlayerId(index + 1))
     .filter(player => player.name.trim() !== "" || player.rank.name.trim() !== "");
 
   // 奇数ならダミープレイヤーを追加
   if ($PlayerListStore.players.length % 2 !== 0) {
-    $PlayerListStore.players.push({
-      id: $PlayerListStore.players.length + 1,
-      organization: "",
-      name: "dummy",
-      rank: { name: "20級", value: 20 },
-      matches: Array.from({ length: 4 }, () => ({ opponent: "", result: { name: "", value: -1 } })),
-      points: 0,
-      sos: 0,
-      sodos: 0,
-      rankingScore: 0,
-      ranking: 0
-    });
+    $PlayerListStore.players.push(new Player($PlayerListStore.players.length + 1, "dummy", { name: "20級", value: 20 }));
   }
   // プレイヤーの要素数が 16 未満の場合、空のプレイヤーを追加
   while ($PlayerListStore.players.length < 16) {
-    $PlayerListStore.players.push({
-      id: $PlayerListStore.players.length + 1,
-      organization: "",
-      name: "",
-      rank: { name: "", value: 99 },
-      matches: Array.from({ length: 4 }, () => ({ opponent: "", result: { name: "", value: -1 } })),
-      points: 0,
-      sos: 0,
-      sodos: 0,
-      rankingScore: 0,
-      ranking: 0
-    });
+    $PlayerListStore.players.push(new Player($PlayerListStore.players.length + 1, "", { name: "", value: 99 }));
   }
   $PlayerStore.players = JSON.parse(JSON.stringify($PlayerListStore.players));
   $toast.success("登録に成功しました!", { position: "top" });
 };
 
+/**
+ * 登録するプレイヤーの入力値をチェックする
+ * @returns {boolean} 入力値に問題ない場合はtrue、それ以外の場合はfalseを返却する
+ */
 const validatePlayers = (): boolean => {
   for (const player of $PlayerListStore.players) {
     const hasName = player.name.trim() !== "";
@@ -92,21 +77,21 @@ const validatePlayers = (): boolean => {
           </v-card-text>
           <template v-slot:actions>
             <v-btn text="キャンセル" @click="dialog = false"></v-btn>
-            <v-btn text="Ok" @click="execRegister()"></v-btn>
+            <v-btn text="Ok" @click="registerPlayers()"></v-btn>
           </template>
         </v-card>
       </v-dialog>
     </v-row>
-    <table class="table-design">
-      <thead class="table-header">
+    <table class="list-table-design">
+      <thead class="list-table-header">
         <tr>
-          <th class="table-header-no">No</th>
-          <th class="table-header-organization">所属</th>
-          <th class="table-header-name">名前</th>
-          <th class="table-header-rank">段級位</th>
+          <th class="list-table-header-no">No</th>
+          <th class="list-table-header-organization">所属</th>
+          <th class="list-table-header-name">名前</th>
+          <th class="list-table-header-rank">段級位</th>
         </tr>
       </thead>
-      <tbody class="table-body">
+      <tbody class="list-table-body">
         <tr v-for="(player, index) in $PlayerListStore.players" :key="player.id">
           <td>{{ index + 1 }}</td>
           <td>
@@ -134,23 +119,25 @@ const validatePlayers = (): boolean => {
 @media print {
   .register-botton {
     display: none !important;
-    ;
   }
 }
 
-.table-design {
+.list-table-design {
+  /* テーブルのヘッダーを固定にするために、テーブル内のセルの境界を分離 */
   border-collapse: separate;
+  /* テーブルにおける隣り合うセルの境界同士の間隔 */
   border-spacing: 0;
+  /* テーブルの列幅は固定 */
   table-layout: fixed;
-  font-weight: bold;
   text-align: center;
   margin: auto;
 }
 
-.table-header th {
+.list-table-header th {
+  /* ヘッダーを画面上部の位置で固定 */
   position: sticky;
   top: 0;
-  z-index: 2;
+  z-index: 1;
   padding: .5em;
   border-top: 2px solid #64dd17;
   border-bottom: 2px solid #64dd17;
@@ -158,25 +145,26 @@ const validatePlayers = (): boolean => {
   background-color: #fff;
 }
 
-.table-body th,
-.table-body td {
+.list-table-body th,
+.list-table-body td {
+  /* ホワイトスペースを統合するが、行は折り返さない */
   white-space: nowrap;
   padding: .01em .5em;
 }
 
-.table-header-no {
+.list-table-header-no {
   width: 10px;
 }
 
-.table-header-organization {
+.list-table-header-organization {
   width: 400px;
 }
 
-.table-header-name {
+.list-table-header-name {
   width: 400px;
 }
 
-.table-header-rank {
+.list-table-header-rank {
   width: 100px;
 }
 
