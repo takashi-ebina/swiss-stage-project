@@ -2,7 +2,7 @@
   "name": "swiss-stage-project",
   "private": true,
   "type": "module",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "swiss stage project",
   "author": "Takashi Ebina",
   "main": "electron/main.js",

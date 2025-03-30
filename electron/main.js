@@ -11,10 +11,12 @@ function createWindow () {
     }
   })
 
-  // 開発時は必ずlocalhostを読み込むように修正
-  win.loadURL('http://localhost:3000')
-  // 開発者ツールを表示
-  // win.webContents.openDevTools()
+  if (process.env.NODE_ENV === "development") {
+    win.loadURL('http://localhost:3000')
+    // win.webContents.openDevTools()
+  } else {
+    mainWindow.loadFile(path.join(__dirname, "../dist/index.html")); // 本番時はビルド済みのHTMLをロード
+  }
 }
 
 app.whenReady().then(() => {
