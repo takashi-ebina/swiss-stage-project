@@ -1,5 +1,8 @@
 import { app, BrowserWindow } from 'electron'
 import path from 'path'
+import { fileURLToPath } from 'url';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 function createWindow () {
   const win = new BrowserWindow({
@@ -15,7 +18,7 @@ function createWindow () {
     win.loadURL('http://localhost:3000')
     // win.webContents.openDevTools()
   } else {
-    mainWindow.loadFile(path.join(__dirname, "../dist/index.html")); // 本番時はビルド済みのHTMLをロード
+    win.loadFile(path.join(app.getAppPath(), 'dist', 'index.html'))
   }
 }
 

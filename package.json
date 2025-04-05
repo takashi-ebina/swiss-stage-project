@@ -55,6 +55,11 @@
       "owner": "takashi-ebina",
       "repo": "swiss-stage-project",
       "releaseType": "release"
-    }
+    },
+    "files": [
+      "dist/**/*",
+      "main.js",
+      "package.json"
+    ]
   }
 }
