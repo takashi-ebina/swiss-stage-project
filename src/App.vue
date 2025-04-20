@@ -1,6 +1,62 @@
 <script setup lang="ts">
 import { RouterLink, RouterView } from 'vue-router'
+import { onMounted } from 'vue';
 import Header from './components/Header.vue'
+import { util } from "@/utils/util";
+import { playerUtil } from "@/utils/playerUtil";
+import type { ProfileDto } from "@/types/profileDto";
+import type { MatchDto } from "@/types/matchDto";
+import { useProfileStore } from "@/stores/profileStore";
+import { usePlayerStore } from "@/stores/playerStore";
+import { Profile } from "@/models/profile";
+import { Player } from "@/models/player";
+
+const $ProfileStore = useProfileStore();
+const $PlayerStore = usePlayerStore();
+
+onMounted(async () => {
+  await window.electronAPI.initDb();
+
+  const profileDtoList: ProfileDto[] = await window.electronAPI.findAllProfiles();
+console.log(profileDtoList);
+  const matchDtoList: MatchDto[] = await window.electronAPI.findAllMatches();
+console.log(matchDtoList);
+  if (!util.isNullOrUndefined(profileDtoList) && profileDtoList.length >= 1) {
+    const savedProfiles: Profile[] = profileDtoList
+      .map((profileDto) => Profile.fromDto(profileDto))
+      .filter(profile => profile.name.trim() !== "" || profile.rank.name.trim() !== "");
+    $ProfileStore.profiles = savedProfiles;
+    if (!util.isNullOrUndefined(matchDtoList) && matchDtoList.length >= 1) {
+      const matchDtoListGroupedById: Record<number, MatchDto[]> = {};
+        for (const match of matchDtoList) {
+          if (!matchDtoListGroupedById[match.id]) {
+            matchDtoListGroupedById[match.id] = [];
+          }
+          matchDtoListGroupedById[match.id].push(match);
+        }
+        const savedPlayers: Player[] = profileDtoList
+          .map((profileDto, index) => Player.fromDtos(profileDto, matchDtoListGroupedById[index + 1]))
+          .filter(player => player.profile.name.trim() !== "" || player.profile.rank.name.trim() !== "");
+        $PlayerStore.players = savedPlayers;
+    } else {
+      savedProfiles.forEach((profile, index) => {
+        $PlayerStore.players[index].profile = profile;
+      });
+    }
+    while ($ProfileStore.profiles.length < 16) {
+      const tmpProfile = new Profile($ProfileStore.profiles.length + 1);
+      $ProfileStore.profiles.push(tmpProfile);
+      $PlayerStore.players.push(new Player(tmpProfile));
+    }
+    $PlayerStore.players.forEach((player, playerIndex) => {
+      player.matches.forEach((match, matchIndex) => {
+        playerUtil.updatePlayerPoints($PlayerStore.players, match, matchIndex, playerIndex);
+      });
+    });
+    playerUtil.updatePlayerMatchScore($PlayerStore.players);
+  }
+});
+
 </script>
 
 <template>

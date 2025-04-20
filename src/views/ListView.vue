@@ -3,13 +3,14 @@ import { ref } from 'vue'
 import 'vue-toast-notification/dist/theme-sugar.css';
 import { useToast } from 'vue-toast-notification';
 import { usePlayerStore } from "@/stores/playerStore";
-import { usePlayerListStore } from "@/stores/playerListStore";
+import { useProfileStore } from "@/stores/profileStore";
 import { rankOptions } from '@/constants/rankOptions'
 import { Player } from '@/models/player';
-import { rules } from '@/utils/validatorUtil';
+import { validatorUtil } from '@/utils/validatorUtil';
+import { Profile } from "@/models/profile";
 
 let $PlayerStore = usePlayerStore();
-const $PlayerListStore = usePlayerListStore();
+const $ProfileStore = useProfileStore();
 const $toast = useToast();
 const dialog = ref(false);
 
@@ -20,22 +21,22 @@ const registerPlayers = (): void => {
   dialog.value = false;
   if (!validatePlayers()) return;
 
-  $PlayerListStore.players.sort((a, b) => a.rank.value - b.rank.value);
+  $ProfileStore.profiles.sort((a, b) => a.rank.value - b.rank.value);
 
   // IDを振り直し、不要なプレイヤーを削除
-  $PlayerListStore.players = $PlayerListStore.players
-    .map((player, index) => player.updatePlayerId(index + 1))
-    .filter(player => player.name.trim() !== "" || player.rank.name.trim() !== "");
+  $ProfileStore.profiles = $ProfileStore.profiles
+    .map((profile, index) => profile.updateProfileId(index + 1))
+    .filter(profile => profile.name.trim() !== "" || profile.rank.name.trim() !== "");
 
   // 奇数ならダミープレイヤーを追加
-  if ($PlayerListStore.players.length % 2 !== 0) {
-    $PlayerListStore.players.push(new Player($PlayerListStore.players.length + 1, "dummy", { name: "20級", value: 20 }));
+  if ($ProfileStore.profiles.length % 2 !== 0) {
+    $ProfileStore.profiles.push(new Profile($ProfileStore.profiles.length + 1, "", "dummy", { name: "20級", value: 20 }));
   }
   // プレイヤーの要素数が 16 未満の場合、空のプレイヤーを追加
-  while ($PlayerListStore.players.length < 16) {
-    $PlayerListStore.players.push(new Player($PlayerListStore.players.length + 1, "", { name: "", value: 99 }));
+  while ($ProfileStore.profiles.length < 16) {
+    $ProfileStore.profiles.push(new Profile($ProfileStore.profiles.length + 1));
   }
-  $PlayerStore.players = JSON.parse(JSON.stringify($PlayerListStore.players));
+  $PlayerStore.players = $ProfileStore.profiles.map(p => new Player(p.clone()));
   $toast.success("登録に成功しました!", { position: "top" });
 };
 
@@ -44,7 +45,7 @@ const registerPlayers = (): void => {
  * @returns {boolean} 入力値に問題ない場合はtrue、それ以外の場合はfalseを返却する
  */
 const validatePlayers = (): boolean => {
-  for (const player of $PlayerListStore.players) {
+  for (const player of $ProfileStore.profiles) {
     const hasName = player.name.trim() !== "";
     const hasRank = player.rank.name.trim() !== "";
 
@@ -92,16 +93,16 @@ const validatePlayers = (): boolean => {
         </tr>
       </thead>
       <tbody class="list-table-body">
-        <tr v-for="(player, index) in $PlayerListStore.players" :key="player.id">
+        <tr v-for="(player, index) in $ProfileStore.profiles" :key="player.id">
           <td>{{ index + 1 }}</td>
           <td>
             <v-text-field v-model="player.organization" variant="underlined" density="compact" maxlength="30"
-              :rules="[rules.checkOrganizationLength]">
+              :rules="[validatorUtil.checkOrganizationLength]">
             </v-text-field>
           </td>
           <td>
             <v-text-field v-model="player.name" variant="underlined" density="compact" maxlength="20"
-              :rules="[rules.checkNameLength]">
+              :rules="[validatorUtil.checkNameLength]">
             </v-text-field>
           </td>
           <td>

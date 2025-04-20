@@ -4,7 +4,7 @@ import { usePlayerStore } from "@/stores/playerStore";
 
 const $PlayerStore = usePlayerStore();
 const filteredPlayers = computed(() => {
-  const rankingSortedPlayers = $PlayerStore.players.slice().filter((player) => player.name !== "");
+  const rankingSortedPlayers = $PlayerStore.players.slice().filter((player) => player.profile.name !== "");
   rankingSortedPlayers.sort((a, b) => b.rankingScore - a.rankingScore);
   return rankingSortedPlayers;
 })
@@ -40,15 +40,15 @@ function getResultClass(ranking: number) {
       <div class="ranking-container">
         <div class="top-ranking">
           <div class="rank" :class="getResultClass(index + 1)"
-            v-for="(player, index) in filteredPlayers.filter((_, i) => i <= 2)" :key="player.id">
+            v-for="(player, index) in filteredPlayers.filter((_, i) => i <= 2)" :key="player.profile.id">
             <span class="rank-number">👑 {{ index + 1 }}位: </span>
-            <span class="rank-name">{{ player.name }}</span>
+            <span class="rank-name">{{ player.profile.name }}</span>
           </div>
         </div>
         <div class="other-ranking">
-          <div class="rank" v-for="(player, index) in filteredPlayers.filter((_, i) => i > 2)" :key="player.id">
+          <div class="rank" v-for="(player, index) in filteredPlayers.filter((_, i) => i > 2)" :key="player.profile.id">
             <span class="rank-number">{{ index + 4 }}位: </span>
-            <span class="rank-name">{{ player.name }}</span>
+            <span class="rank-name">{{ player.profile.name }}</span>
           </div>
         </div>
       </div>

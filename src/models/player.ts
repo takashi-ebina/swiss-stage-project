@@ -1,12 +1,12 @@
 import { Match } from '@/models/match';
 import { Result } from '@/models/result';
-import type { Rank } from '@/types/rank';
+import { Profile } from "@/models/profile";
+import type { ProfileDto } from '@/types/profileDto';
+import type { MatchDto } from '@/types/matchDto';
+import { resultOptions } from "@/constants/resultOptions";
 
 export class Player {
-  id: number;
-  organization: string;
-  name: string;
-  rank: Rank;
+  profile: Profile;
   matches: Match[];
   points: number;
   sos: number;
@@ -15,18 +15,21 @@ export class Player {
   ranking: number;
 
   constructor();
-  constructor(id: number, name: string, rank: Rank);
-  constructor(id?: number, name?: string, rank?: Rank) {
-    this.id = id === undefined ? -1 : id;
-    this.organization = "";
-    this.name = name === undefined || null ? "" : name;
-    this.rank = rank === undefined || null ? { name: "", value: 99 } : rank;
-    this.matches = [
-      new Match("", new Result("", -1)),
-      new Match("", new Result("", -1)),
-      new Match("", new Result("", -1)),
-      new Match("", new Result("", -1)),
-    ]
+  constructor(profile?: Profile, matchDtoList?: MatchDto[]);
+  constructor(profile?: Profile, matchDtoList?: MatchDto[]) {
+    this.profile = profile === undefined ? new Profile() : profile;
+    if (matchDtoList === undefined) {
+      this.matches = [
+         new Match("", new Result("", -1)),
+         new Match("", new Result("", -1)),
+         new Match("", new Result("", -1)),
+         new Match("", new Result("", -1)),
+       ]
+    } else {
+      matchDtoList.sort((a, b) => a.idx - b.idx);
+      this.matches = matchDtoList.map((matchDto) => new Match(matchDto.opponent_id.toString(), 
+        resultOptions.find(result => matchDto.result === result.value) ?? new Result("", -1)));
+    }
     this.points = 0;
     this.sos = 0;
     this.sodos = 0;
@@ -34,8 +37,36 @@ export class Player {
     this.ranking = 0;
   }
 
-  updatePlayerId(id: number): Player{
-    this.id = id;
-    return this;
+  /**
+   * Insertに利用するPlayerDtoに変換
+   */
+  toProfileDto(): ProfileDto {
+    return {
+      id: this.profile.id,
+      organization: this.profile.organization,
+      name: this.profile.name,
+      rank: this.profile.rank.value
+    }
+  }
+  /**
+   * Insertに利用するMatchDto[]に変換
+   */
+  toMatchDtoList(): MatchDto[] {
+    return this.matches.map((match, index) => {
+      return {
+        id: this.profile.id,
+        idx: index,
+        opponent_id: Number(match.opponentId),
+        result: match.result.value, 
+      };
+    });
+  }
+
+  static fromDtos(profileDto: ProfileDto, matchDtoList: MatchDto[]): Player {
+    return new Player(Profile.fromDto(profileDto), matchDtoList);
+  }
+
+  static fromDto(profileDto: ProfileDto): Player {
+    return new Player(Profile.fromDto(profileDto), undefined);
   }
 }

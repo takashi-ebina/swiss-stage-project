@@ -1,32 +1,20 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
+import { playerUtil } from "@/utils/playerUtil";
 import { usePlayerStore } from "@/stores/playerStore";
 import { resultOptions } from "@/constants/resultOptions";
 import { roundOptions } from "@/constants/roundOptions";
+import { CONSTANT } from "@/constants/constant";
 import { Player } from "@/models/player";
 import { Result } from "@/models/result";
 import { Match } from "@/models/match";
 import type { Round } from "@/types/round";
 
-const OPPONENT_PLAYER_NO_MATCH :string = "-99";
 const $PlayerStore = usePlayerStore();
 const selectedRound = ref<Round>({ value: 1 });
 
-watch($PlayerStore.players, (newPlayers, oldPlayers) => {
-  newPlayers.forEach((player, index) => {
-    player.sos = player.matches
-      .filter((match) => match.opponent !== "" && match.opponent !== OPPONENT_PLAYER_NO_MATCH)
-      .map((match) => newPlayers[parseInt(match.opponent) - 1].points)
-      .reduce((sum, points) => sum + points, 0);
-    player.sodos = player.matches
-      .filter((match) => match.opponent !== "" && match.opponent !== OPPONENT_PLAYER_NO_MATCH)
-      .map((match) => newPlayers[parseInt(match.opponent) - 1].sos)
-      .reduce((sum, sos) => sum + sos, 0);
-    player.rankingScore = (player.points * 1000000) + (player.sos * 1000) + (player.sodos * 2);
-    const tmpPlayers = newPlayers.slice();
-    tmpPlayers.sort((a, b) => b.rankingScore - a.rankingScore);
-    player.ranking = tmpPlayers.findIndex(tmpPlayer => tmpPlayer.rankingScore === player.rankingScore) + 1;
-  });
+watch($PlayerStore.players, (newPlayers) => {
+  playerUtil.updatePlayerMatchScore(newPlayers);
 },
   { deep: true }
 );
@@ -55,16 +43,16 @@ const getResultClass = (result: Result): string => {
  */
 const setOpponent = (): void => {
   for (const player of $PlayerStore.players) {
-    if (player.name.trim() === "") break;
+    if (player.profile.name.trim() === "") break;
     if (hasOpponentInRound(player, selectedRound.value.value)) continue;
     // いったん仮で-99を設定する
-    player.matches[selectedRound.value.value - 1].opponent = OPPONENT_PLAYER_NO_MATCH;
+    player.matches[selectedRound.value.value - 1].opponentId = CONSTANT.OPPONENT_PLAYER_NO_MATCH;
     // 毎回、Noの昇順で対戦相手を探すと、組み合わせに偏りが出そうなので、
     // 偶数の回戦の場合はNoの降順で対戦相手を探すようにしているが意味あるかはわからない・・
     const tmpPlayers = selectedRound.value.value % 2 !== 0 ? $PlayerStore.players : [...$PlayerStore.players].reverse();
     for (const opponentPlayer of tmpPlayers) {
-      if (player.id === opponentPlayer.id
-        || opponentPlayer.name.trim() === ""
+      if (player.profile.id === opponentPlayer.profile.id
+        || opponentPlayer.profile.name.trim() === ""
         || hasOpponentInRound(opponentPlayer, selectedRound.value.value)
         || hasAlreadyMatched(player, opponentPlayer, selectedRound.value.value)) {
         continue;
@@ -72,8 +60,8 @@ const setOpponent = (): void => {
       const pointsDifference = Math.abs(player.points -  opponentPlayer.points);
       if (pointsDifference >= 0 && pointsDifference <= 0.5) {
         // お互いの勝ち点の差が0.5点以内の場合、対戦相手としてマッチさせる
-        player.matches[selectedRound.value.value - 1].opponent = opponentPlayer.id.toString();
-        opponentPlayer.matches[selectedRound.value.value - 1].opponent = player.id.toString();
+        player.matches[selectedRound.value.value - 1].opponentId = opponentPlayer.profile.id.toString();
+        opponentPlayer.matches[selectedRound.value.value - 1].opponentId = player.profile.id.toString();
         break;
       }
     }
@@ -87,7 +75,7 @@ const setOpponent = (): void => {
  * @returns {boolean} 既に対戦相手が設定されている場合はtrue、それ以外の場合はfalseを返却する
  */
 const hasOpponentInRound = (player: Player, selectedRound: number): boolean => {
-  return player.matches[selectedRound - 1].opponent !== "";
+  return player.matches[selectedRound - 1].opponentId !== "";
 }
 
 /**
@@ -99,7 +87,7 @@ const hasOpponentInRound = (player: Player, selectedRound: number): boolean => {
  */
 const hasAlreadyMatched = (player: Player, opponentPlayer: Player, currentRound: number): boolean => {
   for (let i = currentRound; i >= 1; i--) {
-    if (parseInt(player.matches[i - 1].opponent) === opponentPlayer.id) {
+    if (parseInt(player.matches[i - 1].opponentId) === opponentPlayer.profile.id) {
       return true;
     }
   }
@@ -114,21 +102,7 @@ const hasAlreadyMatched = (player: Player, opponentPlayer: Player, currentRound:
  * @param {number} ownPlayerIndex プレイヤーのインデックス
  */
 const onResultChange = (match: Match, currentRound: number, ownPlayerIndex: number): void => {
-  if (match.opponent === "") return;
-  const player = $PlayerStore.players[ownPlayerIndex];
-  const opponentPlayer = $PlayerStore.players[parseInt(match.opponent) - 1];
-  // 対戦相手の結果の更新
-  opponentPlayer.matches[currentRound].result = match.result.getOpponentResult();
-
-  // プレイヤー、対戦相手の勝ち点の更新
-  opponentPlayer.points = opponentPlayer.matches
-    .filter((match) => match.result.name !== "")
-    .map((match) => match.result.value)
-    .reduce((sum, resultValue) => sum + resultValue, 0);
-  player.points = player.matches
-    .filter((match) => match.result.name !== "")
-    .map((match) => match.result.value)
-    .reduce((sum, resultValue) => sum + resultValue, 0);
+  playerUtil.updatePlayerPoints($PlayerStore.players, match, currentRound, ownPlayerIndex);
 }
 
 </script>
@@ -173,13 +147,13 @@ const onResultChange = (match: Match, currentRound: number, ownPlayerIndex: numb
         </tr>
       </thead>
       <tbody class="home-table-body">
-        <tr v-for="(player, index) in $PlayerStore.players" :key="player.id">
+        <tr v-for="(player, index) in $PlayerStore.players" :key="player.profile.id">
           <td>{{ index + 1 }}</td>
-          <td class="home-table-body-name">{{ player.name }}</td>
-          <td>{{ player.rank.name }}</td>
+          <td class="home-table-body-name">{{ player.profile.name }}</td>
+          <td>{{ player.profile.rank.name }}</td>
           <template v-for="(match, round) in player.matches" :key="'match-' + index">
             <td class="home-table-body-matches-opponent" :class="getResultClass(match.result)">
-              <v-text-field v-model="match.opponent" variant="underlined" density="compact"></v-text-field>
+              <v-text-field v-model="match.opponentId" variant="underlined" density="compact"></v-text-field>
             </td>
             <td class="home-table-body-matches-result" :class="getResultClass(match.result)">
               <v-select v-model="match.result" :items="resultOptions" item-title="name" item-value="value"
@@ -188,7 +162,7 @@ const onResultChange = (match: Match, currentRound: number, ownPlayerIndex: numb
               </v-select>
             </td>
           </template>
-          <template v-if="player.name !== ''">
+          <template v-if="player.profile.name !== ''">
             <td> {{ player.points }} </td>
             <td> {{ player.sos }} </td>
             <td> {{ player.sodos }} </td>
