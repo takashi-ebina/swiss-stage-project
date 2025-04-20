@@ -13,6 +13,8 @@ const updatePlayerPoints = (players: Player[], match: Match, currentRound: numbe
   if (match.opponentId === "") return;
   const player = players[ownPlayerIndex];
   const opponentPlayer = players[parseInt(match.opponentId) - 1];
+
+  if (opponentPlayer === undefined) return;
   // 対戦相手の結果の更新
   opponentPlayer.matches[currentRound].result = match.result.getOpponentResult();
 
