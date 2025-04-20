@@ -64,10 +64,15 @@
       "releaseType": "release"
     },
     "files": [
-      "dist/**/*",
       "dist-electron/**/*",
       "data/**/*",
       "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "dist",
+        "to": "dist"
+      }
     ]
   }
 }
