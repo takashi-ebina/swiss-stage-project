@@ -1,11 +1,20 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { rules } from '@/utils/validatorUtil';
+import { validatorUtil } from '@/utils/validatorUtil';
+import { useProfileStore } from "@/stores/profileStore";
+import { usePlayerStore } from "@/stores/playerStore";
+import { useToast } from 'vue-toast-notification';
+import { Player } from '@/models/player';
+import { Profile } from '@/models/profile';
 
 const props = defineProps<{
   defaultTitle: string
   defaultLogoName: string
 }>();
+
+const $PlayerStore = usePlayerStore();
+const $ProfileStore = useProfileStore();
+const $toast = useToast();
 
 const titleDialog = ref(false);
 const title = ref("");
@@ -18,8 +27,25 @@ const getImageUrl = (inputLogoName: string) => {
   const logoName = inputLogoName !== "" ? inputLogoName : props.defaultLogoName;
   return new URL(`/src/assets/${logoName}.svg`, import.meta.url).href
 }
-const execPrint = (): void => {
+const save = async () : Promise<void> => {
+  try {
+    await window.electronAPI.delete();
+    for (const player of $PlayerStore.players) {
+      await window.electronAPI.save(player.toProfileDto(), player.toMatchDtoList());
+    }
+  } catch (err) {
+    console.error('DB error:', err);
+    $toast.error("保存に失敗しました", { position: "top" });
+    return;
+  }
+  $toast.success("保存に成功しました!", { position: "top" });
+}
+const print = (): void => {
   window.print();
+}
+const reset = (): void => {
+  $ProfileStore.profiles = Array.from({ length: 16 }, () => new Profile());
+  $PlayerStore.players = Array.from({ length: 16 }, () => new Player());
 }
 </script>
 
@@ -44,7 +70,7 @@ const execPrint = (): void => {
         <v-card-title class="title-daialog">タイトルの入力</v-card-title>
         <v-sheet class="px-3">
           <v-text-field v-model="inputTitle" variant="underlined" density="compact" maxlength="30"
-            :rules="[rules.checkTitleLength]">
+            :rules="[validatorUtil.checkTitleLength]">
           </v-text-field>
         </v-sheet>
         <template v-slot:actions>
@@ -53,8 +79,12 @@ const execPrint = (): void => {
         </template>
       </v-card>
     </v-dialog>
+    <v-btn prepend-icon="mdi-reload" class="reset-button bg-light-green-accent-4 text-white text-body-1 ma-1"
+      @click="reset();" text="リセット"></v-btn>
+    <v-btn prepend-icon="mdi-content-save" class="save-button bg-light-green-accent-4 text-white text-body-1 ma-1"
+      @click="save();" text="保存"></v-btn>
     <v-btn prepend-icon="mdi-printer-outline" class="print-button bg-light-green-accent-4 text-white text-body-1 ma-1"
-      @click="execPrint();" text="印刷"></v-btn>
+      @click="print();" text="印刷"></v-btn>
   </header>
 </template>
 
@@ -84,7 +114,9 @@ header {
 }
 
 @media print {
-  .print-button {
+  .print-button,
+  .save-button,
+  .reset-button {
     display: none;
   }
 }

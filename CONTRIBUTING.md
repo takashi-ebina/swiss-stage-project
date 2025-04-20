@@ -39,6 +39,12 @@ I appreciate your consideration to contribute to this project! This document is 
 
     Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
+- build:
+
+    ```bash
+    npm run build
+    ```
+
 - build electron:
 
     ```bash
@@ -48,7 +54,7 @@ I appreciate your consideration to contribute to this project! This document is 
 - run electron:
 
     ```bash
-    npx electron . 
+    npm run electron:dev
     ```
 
 # Project Rules
