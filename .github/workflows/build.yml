@@ -24,6 +24,12 @@ jobs:
       - name: Install dependencies
         run: yarn install
 
+      - name: Build renderer (Vite)
+        run: yarn build-only
+
+      - name: Build Electron preload and main
+        run: yarn build
+        
       - name: Build/release Electron app
         uses: samuelmeuli/action-electron-builder@v1
         with:
