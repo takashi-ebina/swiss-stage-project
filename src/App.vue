@@ -18,9 +18,8 @@ onMounted(async () => {
   await window.electronAPI.initDb();
 
   const profileDtoList: ProfileDto[] = await window.electronAPI.findAllProfiles();
-console.log(profileDtoList);
   const matchDtoList: MatchDto[] = await window.electronAPI.findAllMatches();
-console.log(matchDtoList);
+
   if (!util.isNullOrUndefined(profileDtoList) && profileDtoList.length >= 1) {
     const savedProfiles: Profile[] = profileDtoList
       .map((profileDto) => Profile.fromDto(profileDto))
