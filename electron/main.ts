@@ -84,7 +84,7 @@ ipcMain.handle('init-db', async () => {
       db,"create table if not exists profile (id integer, organization text, name text, rank integer)"
     );
     await util.promisify(db.run).call(
-      db,"create table if not exists match (id integer, idx integer, opponent_id integer, result integer)"
+      db,"create table if not exists match (id integer, idx integer, opponent_id text, result integer)"
     );
   } catch (err) {
     console.error('DB error:', err);

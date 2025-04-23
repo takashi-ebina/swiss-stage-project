@@ -56,7 +56,7 @@ export class Player {
       return {
         id: this.profile.id,
         idx: index,
-        opponent_id: Number(match.opponentId),
+        opponent_id: match.opponentId,
         result: match.result.value, 
       };
     });
