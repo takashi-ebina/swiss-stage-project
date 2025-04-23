@@ -30,6 +30,7 @@ const updatePlayerPoints = (players: Player[], match: Match, currentRound: numbe
 }
 
 const updatePlayerMatchScore = (players: Player[]): void => {
+console.log(players);
   players.forEach((player) => {
     player.sos = player.matches
       .filter((match) => match.opponentId !== "" && match.opponentId !== CONSTANT.OPPONENT_PLAYER_NO_MATCH)
