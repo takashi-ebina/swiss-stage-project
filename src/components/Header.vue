@@ -52,20 +52,34 @@ const reset = (): void => {
 
 <template>
   <header>
-    <img @click="logoDialog = true" alt="logo" class="logo" :src="getImageUrl(inputLogoName)" />
-    <v-dialog v-model="logoDialog" width="auto">
-      <v-card width="500">
-        <v-card-title class="daialog-title">ロゴの選択</v-card-title>
-        <v-sheet class="px-3">
-          <div class="image-container">
-            <img alt="logo" class="pa-3" src="@/assets/igo.svg" @click="logoDialog = false; inputLogoName='igo'" />
-            <img alt="logo" class="pa-3" src="@/assets/shogi.svg" @click="logoDialog = false; inputLogoName='shogi'" />
-            <img alt="logo" class="pa-3" src="@/assets/chess.svg" @click="logoDialog = false; inputLogoName='chess'" />
-          </div>
-        </v-sheet>
-      </v-card>
-    </v-dialog>
-    <h1 @click="titleDialog = true" class="title">{{ title === "" ? props.defaultTitle : title }}</h1>
+    <v-tooltip location="bottom" text="クリックして編集する">
+      <template v-slot:activator="{ props }">
+        <img v-bind="props" @click="logoDialog = true" alt="logo" class="logo" :src="getImageUrl(inputLogoName)" />
+        <v-dialog v-model="logoDialog" width="auto">
+          <v-card width="500">
+            <v-card-title class="daialog-title">ロゴの選択</v-card-title>
+            <v-sheet class="px-3">
+              <div class="image-container">
+                <img alt="logo" class="pa-3" src="@/assets/igo.svg" @click="logoDialog = false; inputLogoName='igo'" />
+                <img alt="logo" class="pa-3" src="@/assets/shogi.svg" @click="logoDialog = false; inputLogoName='shogi'" />
+                <img alt="logo" class="pa-3" src="@/assets/chess.svg" @click="logoDialog = false; inputLogoName='chess'" />
+              </div>
+            </v-sheet>
+          </v-card>
+        </v-dialog>
+      </template>
+    </v-tooltip>
+    <h1 class="title">
+      {{ title === "" ? props.defaultTitle : title }}
+      <sup @click="titleDialog = true">
+        <v-tooltip location="top"
+          text="クリックして編集する">
+          <template v-slot:activator="{ props }">
+            <v-icon v-bind="props" opacity="40%" size="x-small" icon="mdi-pencil-outline" class="title-edit-icon"></v-icon>
+          </template>
+        </v-tooltip>
+      </sup>
+    </h1>
     <v-dialog v-model="titleDialog" width="auto">
       <v-card width="500">
         <v-card-title class="title-daialog">タイトルの入力</v-card-title>
@@ -80,6 +94,7 @@ const reset = (): void => {
         </template>
       </v-card>
     </v-dialog>
+    
     <v-btn prepend-icon="mdi-reload" class="reset-button bg-light-green-accent-4 text-white text-body-1 ma-1"
       @click="reset();" text="リセット"></v-btn>
     <v-btn prepend-icon="mdi-content-save" class="save-button bg-light-green-accent-4 text-white text-body-1 ma-1"
@@ -110,14 +125,13 @@ header {
 
 .logo {
   flex: 1;
-  width: 70px;
-  height: 70px;
+  width: 60px;
+  height: 60px;
 }
 
 @media print {
-  .print-button,
-  .save-button,
-  .reset-button {
+  .print-button, .save-button, .reset-button,
+  .title-edit-icon {
     display: none;
   }
 }

@@ -18,6 +18,7 @@ const dialog = ref(false);
  * プレイヤーの一覧を登録する
  */
 const registerPlayers = (): void => {
+  let existsDummyPlayer: boolean = false;
   dialog.value = false;
   if (!validatePlayers()) return;
 
@@ -30,14 +31,16 @@ const registerPlayers = (): void => {
 
   // 奇数ならダミープレイヤーを追加
   if ($ProfileStore.profiles.length % 2 !== 0) {
-    $ProfileStore.profiles.push(new Profile($ProfileStore.profiles.length + 1, "", "dummy", { name: "20級", value: 20 }));
+    $ProfileStore.profiles.push(new Profile($ProfileStore.profiles.length + 1, "", "ダミーユーザー", { name: "20級", value: 20 }));
+    existsDummyPlayer = true;
   }
   // プレイヤーの要素数が 16 未満の場合、空のプレイヤーを追加
   while ($ProfileStore.profiles.length < 16) {
     $ProfileStore.profiles.push(new Profile($ProfileStore.profiles.length + 1));
   }
   $PlayerStore.players = $ProfileStore.profiles.map(p => new Player(p.clone()));
-  $toast.success("登録に成功しました!", { position: "top" });
+  $toast.success("登録に成功しました!" + (!existsDummyPlayer ? "<br><br>参加者が奇数のため、ダミーユーザーを追加しています" : ""), { position: "top" });
+  
 };
 
 /**
