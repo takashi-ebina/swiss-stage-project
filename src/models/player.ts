@@ -24,6 +24,7 @@ export class Player {
          new Match("", new Result("", -1)),
          new Match("", new Result("", -1)),
          new Match("", new Result("", -1)),
+         new Match("", new Result("", -1)),
        ]
     } else {
       matchDtoList.sort((a, b) => a.idx - b.idx);

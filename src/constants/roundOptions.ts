@@ -5,4 +5,5 @@ export const roundOptions: Round[] = [
   { value: 2 },
   { value: 3 },
   { value: 4 },
+  { value: 5 },
 ];

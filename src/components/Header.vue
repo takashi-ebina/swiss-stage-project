@@ -6,6 +6,7 @@ import { usePlayerStore } from "@/stores/playerStore";
 import { useToast } from 'vue-toast-notification';
 import { Player } from '@/models/player';
 import { Profile } from '@/models/profile';
+import { constant } from '@/constants/constant';
 
 const props = defineProps<{
   defaultTitle: string
@@ -19,7 +20,6 @@ const $toast = useToast();
 const titleDialog = ref(false);
 const title = ref("");
 const inputTitle = ref("");
-
 const logoDialog = ref(false);
 const inputLogoName = ref("");
 
@@ -41,11 +41,12 @@ const save = async () : Promise<void> => {
   $toast.success("保存に成功しました!", { position: "top" });
 }
 const print = (): void => {
+  alert("印刷の向きは横向きを推奨します");
   window.print();
 }
 const reset = (): void => {
-  $ProfileStore.profiles = Array.from({ length: 16 }, () => new Profile());
-  $PlayerStore.players = Array.from({ length: 16 }, () => new Player());
+  $ProfileStore.profiles = Array.from({ length: constant.PLAYER_MAX_SIZE }, () => new Profile());
+  $PlayerStore.players = Array.from({ length: constant.PLAYER_MAX_SIZE }, () => new Player());
 }
 </script>
 
