@@ -4,7 +4,7 @@ import { playerUtil } from "@/utils/playerUtil";
 import { usePlayerStore } from "@/stores/playerStore";
 import { resultOptions } from "@/constants/resultOptions";
 import { roundOptions } from "@/constants/roundOptions";
-import { CONSTANT } from "@/constants/constant";
+import { constant } from "@/constants/constant";
 import { Player } from "@/models/player";
 import { Result } from "@/models/result";
 import { Match } from "@/models/match";
@@ -46,7 +46,7 @@ const setOpponent = (): void => {
     if (player.profile.name.trim() === "") break;
     if (hasOpponentInRound(player, selectedRound.value.value)) continue;
     // いったん仮で-99を設定する
-    player.matches[selectedRound.value.value - 1].opponentId = CONSTANT.OPPONENT_PLAYER_NO_MATCH;
+    player.matches[selectedRound.value.value - 1].opponentId = constant.OPPONENT_PLAYER_NO_MATCH;
     // 毎回、Noの昇順で対戦相手を探すと、組み合わせに偏りが出そうなので、
     // 偶数の回戦の場合はNoの降順で対戦相手を探すようにしているが意味あるかはわからない・・
     const tmpPlayers = selectedRound.value.value % 2 !== 0 ? $PlayerStore.players : [...$PlayerStore.players].reverse();
@@ -135,8 +135,32 @@ const onResultChange = (match: Match, currentRound: number, ownPlayerIndex: numb
             <th style="display:none"></th>
           </template>
           <th rowspan="2">勝点</th>
-          <th rowspan="2">SOS</th>
-          <th rowspan="2">SODOS</th>
+          <th rowspan="2">
+            SOS
+            <sup>
+              <v-tooltip
+                activator="parent"
+                location="top"
+                text="Sum of Opponents Scores（対戦相手の勝ち星の数）">
+                <template v-slot:activator="{ props }">
+                  <v-icon  v-bind="props" opacity="60%" icon="mdi-information-outline" size="x-small"></v-icon>
+                </template>
+              </v-tooltip>
+            </sup>
+          </th>
+          <th rowspan="2">
+            SODOS
+            <sup>
+              <v-tooltip
+                activator="parent"
+                location="top"
+                text="Sum of Defeated Opponents Scores（負かした対戦相手の勝ち星の数）">
+                <template v-slot:activator="{ props }">
+                  <v-icon  v-bind="props" opacity="60%" icon="mdi-information-outline" size="x-small"></v-icon>
+                </template>
+              </v-tooltip>
+            </sup>
+          </th>
           <th rowspan="2">順位</th>
         </tr>
         <tr>
