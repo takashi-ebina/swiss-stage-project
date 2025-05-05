@@ -1,6 +1,6 @@
 import { Player } from "@/models/player";
 import { Match } from "@/models/match";
-import { CONSTANT } from "@/constants/constant";
+import { constant } from "@/constants/constant";
 
 /**
  * 対戦相手の結果の更新とプレイヤー、対戦相手の勝ち点の更新を行う
@@ -32,11 +32,11 @@ const updatePlayerPoints = (players: Player[], match: Match, currentRound: numbe
 const updatePlayerMatchScore = (players: Player[]): void => {
   players.forEach((player) => {
     player.sos = player.matches
-      .filter((match) => match.opponentId !== "" && match.opponentId !== CONSTANT.OPPONENT_PLAYER_NO_MATCH)
+      .filter((match) => match.opponentId !== "" && match.opponentId !== constant.OPPONENT_PLAYER_NO_MATCH)
       .map((match) => players[parseInt(match.opponentId) - 1].points)
       .reduce((sum, points) => sum + points, 0);
     player.sodos = player.matches
-      .filter((match) => match.opponentId !== "" && match.opponentId !== CONSTANT.OPPONENT_PLAYER_NO_MATCH)
+      .filter((match) => match.opponentId !== "" && match.opponentId !== constant.OPPONENT_PLAYER_NO_MATCH)
       .map((match) => players[parseInt(match.opponentId) - 1].sos)
       .reduce((sum, sos) => sum + sos, 0);
     player.rankingScore = (player.points * 1000000) + (player.sos * 1000) + (player.sodos * 2);
