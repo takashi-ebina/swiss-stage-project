@@ -138,12 +138,10 @@ const onResultChange = (match: Match, currentRound: number, ownPlayerIndex: numb
           <th rowspan="2">
             SOS
             <sup>
-              <v-tooltip
-                activator="parent"
-                location="top"
+              <v-tooltip location="top"
                 text="Sum of Opponents Scores（対戦相手の勝ち星の数）">
                 <template v-slot:activator="{ props }">
-                  <v-icon  v-bind="props" opacity="60%" icon="mdi-information-outline" size="x-small"></v-icon>
+                  <v-icon v-bind="props" opacity="60%" size="x-small" icon="mdi-information-outline" class="information-icon"></v-icon>
                 </template>
               </v-tooltip>
             </sup>
@@ -151,12 +149,10 @@ const onResultChange = (match: Match, currentRound: number, ownPlayerIndex: numb
           <th rowspan="2">
             SODOS
             <sup>
-              <v-tooltip
-                activator="parent"
-                location="top"
+              <v-tooltip location="top"
                 text="Sum of Defeated Opponents Scores（負かした対戦相手の勝ち星の数）">
                 <template v-slot:activator="{ props }">
-                  <v-icon  v-bind="props" opacity="60%" icon="mdi-information-outline" size="x-small"></v-icon>
+                  <v-icon v-bind="props" opacity="60%" size="x-small" icon="mdi-information-outline" class="information-icon"></v-icon>
                 </template>
               </v-tooltip>
             </sup>
@@ -164,7 +160,7 @@ const onResultChange = (match: Match, currentRound: number, ownPlayerIndex: numb
           <th rowspan="2">順位</th>
         </tr>
         <tr>
-          <template v-for="round in 4" :key="'result-' + round">
+          <template v-for="round in roundOptions" :key="'result-' + round">
             <th class="home-table-header-match">相手</th>
             <th class="home-table-header-match">結果</th>
           </template>
@@ -207,7 +203,8 @@ const onResultChange = (match: Match, currentRound: number, ownPlayerIndex: numb
 <style>
 @media print {
   .setting-botton,
-  .round-select {
+  .round-select,
+  .information-icon {
     display: none !important;
   }
 }
