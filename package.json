@@ -63,6 +63,10 @@
       "repo": "swiss-stage-project",
       "releaseType": "release"
     },
+    "win": {
+      "target": "nsis",
+      "icon": "swiss-stage-project.ico"
+    },
     "files": [
       "dist/**/*",
       "dist-electron/**/*",
