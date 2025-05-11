@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { onMounted, reactive } from 'vue'
 import { validatorUtil } from '@/utils/validatorUtil';
 import { useProfileStore } from "@/stores/profileStore";
 import { usePlayerStore } from "@/stores/playerStore";
@@ -7,24 +7,23 @@ import { useToast } from 'vue-toast-notification';
 import { Player } from '@/models/player';
 import { Profile } from '@/models/profile';
 import { constant } from '@/constants/constant';
-
+import type { TitleInfoDto } from '@/types/titleInfoDto';
 const props = defineProps<{
-  defaultTitle: string
-  defaultLogoName: string
+  defaultTitle: string,
+  defaultLogoName: string,
 }>();
-
+const state = reactive({
+  titleDialog: false,
+  logoDialog: false,
+  title: props.defaultTitle,
+  inputTitle: props.defaultTitle,
+  logoName: props.defaultLogoName,
+});
 const $PlayerStore = usePlayerStore();
 const $ProfileStore = useProfileStore();
 const $toast = useToast();
 
-const titleDialog = ref(false);
-const title = ref("");
-const inputTitle = ref("");
-const logoDialog = ref(false);
-const inputLogoName = ref("");
-
-const getImageUrl = (inputLogoName: string) => {
-  const logoName = inputLogoName !== "" ? inputLogoName : props.defaultLogoName;
+const getImageUrl = (logoName: string) => {
   return new URL(`/src/assets/${logoName}.svg`, import.meta.url).href
 }
 const save = async () : Promise<void> => {
@@ -33,6 +32,8 @@ const save = async () : Promise<void> => {
     for (const player of $PlayerStore.players) {
       await window.electronAPI.save(player.toProfileDto(), player.toMatchDtoList());
     }
+    const titleInfoDto: TitleInfoDto = {logo_name: state.logoName, title: state.title};
+    await window.electronAPI.saveTitleInfo(titleInfoDto);
   } catch (err) {
     console.error('DB error:', err);
     $toast.error("保存に失敗しました", { position: "top" });
@@ -47,6 +48,9 @@ const print = (): void => {
 const reset = (): void => {
   $ProfileStore.profiles = Array.from({ length: constant.PLAYER_MAX_SIZE }, () => new Profile());
   $PlayerStore.players = Array.from({ length: constant.PLAYER_MAX_SIZE }, () => new Player());
+  state.logoName = "igo";
+  state.title = "swiss-stage-project";
+  state.inputTitle = "swiss-stage-project";
 }
 </script>
 
@@ -54,15 +58,15 @@ const reset = (): void => {
   <header>
     <v-tooltip location="bottom" text="クリックして編集する">
       <template v-slot:activator="{ props }">
-        <img v-bind="props" @click="logoDialog = true" alt="logo" class="logo" :src="getImageUrl(inputLogoName)" />
-        <v-dialog v-model="logoDialog" width="auto">
+        <img v-bind="props" @click="state.logoDialog = true" alt="logo" class="logo" :src="getImageUrl(state.logoName)" />
+        <v-dialog v-model="state.logoDialog" width="auto">
           <v-card width="500">
             <v-card-title class="daialog-title">ロゴの選択</v-card-title>
             <v-sheet class="px-3">
               <div class="image-container">
-                <img alt="logo" class="pa-3" src="@/assets/igo.svg" @click="logoDialog = false; inputLogoName='igo'" />
-                <img alt="logo" class="pa-3" src="@/assets/shogi.svg" @click="logoDialog = false; inputLogoName='shogi'" />
-                <img alt="logo" class="pa-3" src="@/assets/chess.svg" @click="logoDialog = false; inputLogoName='chess'" />
+                <img alt="logo" class="pa-3" src="@/assets/igo.svg" @click="state.logoDialog = false; state.logoName='igo'" />
+                <img alt="logo" class="pa-3" src="@/assets/shogi.svg" @click="state.logoDialog = false; state.logoName='shogi'" />
+                <img alt="logo" class="pa-3" src="@/assets/chess.svg" @click="state.logoDialog = false; state.logoName='chess'" />
               </div>
             </v-sheet>
           </v-card>
@@ -70,8 +74,8 @@ const reset = (): void => {
       </template>
     </v-tooltip>
     <h1 class="title">
-      {{ title === "" ? props.defaultTitle : title }}
-      <sup @click="titleDialog = true">
+      {{ state.title }}
+      <sup @click="state.titleDialog = true">
         <v-tooltip location="top"
           text="クリックして編集する">
           <template v-slot:activator="{ props }">
@@ -80,17 +84,17 @@ const reset = (): void => {
         </v-tooltip>
       </sup>
     </h1>
-    <v-dialog v-model="titleDialog" width="auto">
+    <v-dialog v-model="state.titleDialog" width="auto">
       <v-card width="500">
         <v-card-title class="title-daialog">タイトルの入力</v-card-title>
         <v-sheet class="px-3">
-          <v-text-field v-model="inputTitle" variant="underlined" density="compact" maxlength="30"
+          <v-text-field v-model="state.inputTitle" variant="underlined" density="compact" maxlength="30"
             :rules="[validatorUtil.checkTitleLength]">
           </v-text-field>
         </v-sheet>
         <template v-slot:actions>
-          <v-btn text="キャンセル" @click="titleDialog = false; inputTitle = '';"></v-btn>
-          <v-btn text="Ok"        @click="titleDialog = false; title = inputTitle;"></v-btn>
+          <v-btn text="キャンセル" @click="state.titleDialog = false; state.inputTitle = state.title;"></v-btn>
+          <v-btn text="Ok"        @click="state.titleDialog = false; state.title = state.inputTitle;"></v-btn>
         </template>
       </v-card>
     </v-dialog>

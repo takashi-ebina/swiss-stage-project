@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
+import 'vue-toast-notification/dist/theme-sugar.css';
+import { useToast } from 'vue-toast-notification';
 import { playerUtil } from "@/utils/playerUtil";
 import { usePlayerStore } from "@/stores/playerStore";
 import { resultOptions } from "@/constants/resultOptions";
@@ -11,8 +13,9 @@ import { Match } from "@/models/match";
 import type { Round } from "@/types/round";
 
 const $PlayerStore = usePlayerStore();
+const $toast = useToast();
 const selectedRound = ref<Round>({ value: 1 });
-
+  
 watch($PlayerStore.players, (newPlayers) => {
   playerUtil.updatePlayerMatchScore(newPlayers);
 },
@@ -66,6 +69,22 @@ const setOpponent = (): void => {
       }
     }
   }
+  if (existsNoMatchPlayer()) {
+    $toast.warning("対戦相手を設定しました! <br><br>相手がマッチしなかった参加者がいるので手動で設定してください", { position: "top" });
+  } else {
+    $toast.success("対戦相手を設定しました!", { position: "top" });
+  }
+  
+}
+
+/**
+ * 対戦相手がマッチしないプレイヤーがいるかどうか
+ * @returns {boolean} 対戦相手がマッチしない参加者がいる場合はtrue、それ以外の場合はfalseを返却する
+ */
+const existsNoMatchPlayer = (): boolean => {
+  return $PlayerStore.players
+    .map((player) => player.matches[selectedRound.value.value - 1].opponentId)
+    .includes(constant.OPPONENT_PLAYER_NO_MATCH);
 }
 
 /**

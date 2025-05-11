@@ -41,7 +41,7 @@ function getResultClass(ranking: number) {
         <div class="top-ranking">
           <div class="rank" :class="getResultClass(index + 1)"
             v-for="(player, index) in filteredPlayers.filter((_, i) => i <= 2)" :key="player.profile.id">
-            <span class="rank-number">👑 {{ index + 1 }}位: </span>
+            <span class="rank-number"><v-icon>mdi-crown</v-icon> {{ index + 1 }}位: </span>
             <span class="rank-name">{{ player.profile.name }}</span>
           </div>
         </div>
@@ -79,7 +79,7 @@ function getResultClass(ranking: number) {
   /* 縦並び */
   display: flex;
   flex-direction: column;
-  width: 60%;
+  width: 75%;
   gap: 20px;
   padding: 10px;
 }

@@ -8,6 +8,7 @@ import { rankOptions } from '@/constants/rankOptions'
 import { Player } from '@/models/player';
 import { validatorUtil } from '@/utils/validatorUtil';
 import { Profile } from "@/models/profile";
+import { constant } from '@/constants/constant';
 
 let $PlayerStore = usePlayerStore();
 const $ProfileStore = useProfileStore();
@@ -34,12 +35,12 @@ const registerPlayers = (): void => {
     $ProfileStore.profiles.push(new Profile($ProfileStore.profiles.length + 1, "", "ダミーユーザー", { name: "20級", value: 20 }));
     existsDummyPlayer = true;
   }
-  // プレイヤーの要素数が 16 未満の場合、空のプレイヤーを追加
-  while ($ProfileStore.profiles.length < 16) {
+  // プレイヤーの要素数が 32 未満の場合、空のプレイヤーを追加
+  while ($ProfileStore.profiles.length < constant.PLAYER_MAX_SIZE) {
     $ProfileStore.profiles.push(new Profile($ProfileStore.profiles.length + 1));
   }
   $PlayerStore.players = $ProfileStore.profiles.map(p => new Player(p.clone()));
-  $toast.success("登録に成功しました!" + (!existsDummyPlayer ? "<br><br>参加者が奇数のため、ダミーユーザーを追加しています" : ""), { position: "top" });
+  $toast.success("登録に成功しました!" + (existsDummyPlayer ? "<br><br>参加者が奇数のため、ダミーユーザーを追加しています" : ""), { position: "top" });
   
 };
 

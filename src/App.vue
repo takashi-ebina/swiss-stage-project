@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { RouterLink, RouterView } from 'vue-router'
-import { onMounted } from 'vue';
+import { onMounted, reactive } from 'vue';
 import Header from './components/Header.vue'
 import { util } from "@/utils/util";
 import { playerUtil } from "@/utils/playerUtil";
@@ -10,15 +10,23 @@ import { useProfileStore } from "@/stores/profileStore";
 import { usePlayerStore } from "@/stores/playerStore";
 import { Profile } from "@/models/profile";
 import { Player } from "@/models/player";
+import type { TitleInfoDto } from './types/titleInfoDto';
+import { constant } from './constants/constant';
 
 const $ProfileStore = useProfileStore();
 const $PlayerStore = usePlayerStore();
+const state = reactive({
+  defaultTitle: "",
+  defaultLogoName: "",
+  isReady: false,
+});
 
 onMounted(async () => {
   await window.electronAPI.initDb();
 
   const profileDtoList: ProfileDto[] = await window.electronAPI.findAllProfiles();
   const matchDtoList: MatchDto[] = await window.electronAPI.findAllMatches();
+  const TitleInfoDtoList: TitleInfoDto[] = await window.electronAPI.findOneTitleInfo();
 
   if (!util.isNullOrUndefined(profileDtoList) && profileDtoList.length >= 1) {
     const savedProfiles: Profile[] = profileDtoList
@@ -42,7 +50,7 @@ onMounted(async () => {
         $PlayerStore.players[index].profile = profile;
       });
     }
-    while ($ProfileStore.profiles.length < 16) {
+    while ($ProfileStore.profiles.length < constant.PLAYER_MAX_SIZE) {
       const tmpProfile = new Profile($ProfileStore.profiles.length + 1);
       $ProfileStore.profiles.push(tmpProfile);
       $PlayerStore.players.push(new Player(tmpProfile));
@@ -54,13 +62,26 @@ onMounted(async () => {
     });
     playerUtil.updatePlayerMatchScore($PlayerStore.players);
   }
+
+  if (!util.isNullOrUndefined(TitleInfoDtoList) && TitleInfoDtoList.length >= 1) {
+    state.defaultTitle = TitleInfoDtoList[0].title;
+    state.defaultLogoName = TitleInfoDtoList[0].logo_name;
+  } else {
+    state.defaultTitle = "swiss-stage-project";
+    state.defaultLogoName = "igo"; 
+  }
+  state.isReady = true;
 });
 
 </script>
 
 <template>
-  <Header defaultTitle="swiss-stage-project" defaultLogoName="igo" />
-  <div>
+  <Header
+    v-if="state.isReady"
+    :defaultTitle="state.defaultTitle"
+    :defaultLogoName="state.defaultLogoName"
+  />
+  <div v-if="state.isReady">
     <nav>
       <RouterLink to="/">
         <v-icon class="mr-2">mdi-home</v-icon> Home
@@ -73,7 +94,7 @@ onMounted(async () => {
       </RouterLink>
     </nav>
   </div>
-  <RouterView />
+  <RouterView v-if="state.isReady"/>
 </template>
 
 <style scoped>
