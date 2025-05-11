@@ -10,21 +10,25 @@
 
 ※`x.x.x`はバージョン番号
 
-ダウンロードした`swiss-stage-project-Setup-x.x.x.exe`をダブルクリック後、Desktopに`swiss-stage-project.exe`のショートカットファイルが作成されます
+ダウンロードした`swiss-stage-project-Setup-x.x.x.exe`をダブルクリック後、デスクトップに`swiss-stage-project.exe`のショートカットファイルが作成されます
+
+### アイコン
+
+<img src="https://github.com/user-attachments/assets/5d04d600-91a6-468d-adf2-e4f0427b9cfe" width="20%">
   
 ## 画面
 
 ### 対戦表
 
-![対戦表](https://github.com/user-attachments/assets/96b00427-9d37-4f62-ace1-5323bc2c66e7)
+![対戦表](https://github.com/user-attachments/assets/b1c64f6d-f8c0-47ef-b187-91ac3a701ae3)
 
 ### 参加者リスト
 
-![参加者リスト](https://github.com/user-attachments/assets/78ddf75c-4690-4df2-82bc-6ae62b29d4bd)
+![参加者リスト](https://github.com/user-attachments/assets/bbef268a-5431-42cd-97aa-412b4cc1fbfa)
 
 ### ランキング
 
-![ランキング](https://github.com/user-attachments/assets/43223512-6ada-463c-ae9d-363a2ab6af38)
+![ランキング](https://github.com/user-attachments/assets/c8740d7d-3369-416a-a85a-6646ccb52476)
 
 ## 使い方
 
@@ -47,9 +51,9 @@
     - 勝
     - 負
     - ジゴ
-- `対戦相手の設定`を押下することで、1回戦～4回戦の対戦相手を自動で設定することができます
+- `対戦相手の設定`を押下することで、1回戦～5回戦の対戦相手を自動で設定することができます
   - どの回戦に対して、対戦相手を設定するかは、`対戦相手の設定`のセレクトボックスから選択できます
-  - 基本的に同じ勝ち点かつ一度も対戦していない相手とマッチします
+  - 基本的にお互いの勝ち点の差が0.5点以内かつ一度も対戦していない相手とマッチします
   - 適切な対戦相手がいない場合、`-99`が設定されます
 
 ### ３．ランキングから、現在の順位を確認する
