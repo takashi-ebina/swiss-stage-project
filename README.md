@@ -24,11 +24,11 @@
 
 ### 参加者リスト
 
-![参加者リスト](https://github.com/user-attachments/assets/bbef268a-5431-42cd-97aa-412b4cc1fbfa)
+![参加者リスト](https://github.com/user-attachments/assets/043f8fa7-d4e4-48a1-bde3-d60f9579cff0)
 
 ### ランキング
 
-![ランキング](https://github.com/user-attachments/assets/c8740d7d-3369-416a-a85a-6646ccb52476)
+![ランキング](https://github.com/user-attachments/assets/ce5829a2-982f-4e0f-8938-9c03adc0eeee)
 
 ## 使い方
 
