@@ -94,7 +94,7 @@ const reset = (): void => {
         </v-sheet>
         <template v-slot:actions>
           <v-btn text="キャンセル" @click="state.titleDialog = false; state.inputTitle = state.title;"></v-btn>
-          <v-btn text="Ok"        @click="state.titleDialog = false; state.title = state.inputTitle;"></v-btn>
+          <v-btn text="登録する"   @click="state.titleDialog = false; state.title = state.inputTitle;"></v-btn>
         </template>
       </v-card>
     </v-dialog>

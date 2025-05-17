@@ -44,10 +44,14 @@ function getResultClass(ranking: number) {
             <span class="rank-number"><v-icon>mdi-crown</v-icon> {{ index + 1 }}位: </span>
             <span class="rank-name">{{ player.profile.name }}</span>
           </div>
+          <div class="rank other" v-for="(player, index) in filteredPlayers.filter((_, i) => i > 2 && i <= 7)" :key="player.profile.id">
+            <span class="rank-number">{{ index + 4 }}位: </span>
+            <span class="rank-name">{{ player.profile.name }}</span>
+          </div>
         </div>
         <div class="other-ranking">
-          <div class="rank" v-for="(player, index) in filteredPlayers.filter((_, i) => i > 2)" :key="player.profile.id">
-            <span class="rank-number">{{ index + 4 }}位: </span>
+          <div class="rank" v-for="(player, index) in filteredPlayers.filter((_, i) => i > 7)" :key="player.profile.id">
+            <span class="rank-number">{{ index + 9 }}位: </span>
             <span class="rank-name">{{ player.profile.name }}</span>
           </div>
         </div>
@@ -113,6 +117,8 @@ function getResultClass(ranking: number) {
   /* 最初は非表示 */
   opacity: 0;
   animation: fadeIn 1s ease-out forwards;
+  border-radius: 5px;
+  box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.3);
 }
 
 @media print {
@@ -151,6 +157,10 @@ function getResultClass(ranking: number) {
 .bronze {
   background: linear-gradient(90deg, #cd7f32, #b87333);
   animation-delay: 0.5s!important;
+}
+
+.other {
+  animation-delay: 0.7s!important;
 }
 
 .other-ranking {

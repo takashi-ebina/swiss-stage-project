@@ -21,7 +21,10 @@ const dialog = ref(false);
 const registerPlayers = (): void => {
   let existsDummyPlayer: boolean = false;
   dialog.value = false;
-  if (!validatePlayers()) return;
+  if (!validatorUtil.validateprofiles($ProfileStore.profiles)) {
+    $toast.error("名前と段級位は両方入力するか、両方空にしてください", { position: "top" });
+    return;
+  } 
 
   $ProfileStore.profiles.sort((a, b) => a.rank.value - b.rank.value);
 
@@ -42,23 +45,6 @@ const registerPlayers = (): void => {
   $PlayerStore.players = $ProfileStore.profiles.map(p => new Player(p.clone()));
   $toast.success("登録に成功しました!" + (existsDummyPlayer ? "<br><br>参加者が奇数のため、ダミーユーザーを追加しています" : ""), { position: "top" });
   
-};
-
-/**
- * 登録するプレイヤーの入力値をチェックする
- * @returns {boolean} 入力値に問題ない場合はtrue、それ以外の場合はfalseを返却する
- */
-const validatePlayers = (): boolean => {
-  for (const player of $ProfileStore.profiles) {
-    const hasName = player.name.trim() !== "";
-    const hasRank = player.rank.name.trim() !== "";
-
-    if ((hasName && !hasRank) || (!hasName && hasRank)) {
-      $toast.error("名前と段級位は両方入力するか、両方空にしてください", { position: "top" });
-      return false;
-    }
-  }
-  return true;
 };
 </script>
 
@@ -82,7 +68,7 @@ const validatePlayers = (): boolean => {
           </v-card-text>
           <template v-slot:actions>
             <v-btn text="キャンセル" @click="dialog = false"></v-btn>
-            <v-btn text="Ok" @click="registerPlayers()"></v-btn>
+            <v-btn text="登録する" @click="registerPlayers()"></v-btn>
           </template>
         </v-card>
       </v-dialog>
@@ -92,8 +78,8 @@ const validatePlayers = (): boolean => {
         <tr>
           <th class="list-table-header-no">No</th>
           <th class="list-table-header-organization">所属</th>
-          <th class="list-table-header-name">名前</th>
-          <th class="list-table-header-rank">段級位</th>
+          <th class="list-table-header-name required">名前</th>
+          <th class="list-table-header-rank required">段級位</th>
         </tr>
       </thead>
       <tbody class="list-table-body">
@@ -177,5 +163,11 @@ const validatePlayers = (): boolean => {
   font-size: 1rem;
   color: #fff;
   background-color: hsla(160, 100%, 37%, 0.8);
+}
+
+.required::after {
+  content: " *";
+  color: #ff4b00;
+  vertical-align: middle;
 }
 </style>
