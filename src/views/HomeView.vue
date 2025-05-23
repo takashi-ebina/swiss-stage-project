@@ -274,11 +274,11 @@ const onResultChange = (match: Match, currentRound: number, ownPlayerIndex: numb
 }
 
 .home-table-body-matches-opponent {
-  width: 50px;
+  width: 45px;
 }
 
 .home-table-body-matches-result {
-  width: 90px;
+  width: 65px;
 }
 
 .result-win {
@@ -292,4 +292,5 @@ const onResultChange = (match: Match, currentRound: number, ownPlayerIndex: numb
 .result-draw {
   background-color: rgba(255, 255, 0, 0.2);
 }
+
 </style>

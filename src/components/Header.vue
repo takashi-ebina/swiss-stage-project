@@ -115,9 +115,8 @@ header {
   flex-direction: row;
   /* 縦・横方向の中央揃え */
   place-items: center;
-  gap: 1rem;
   width: 100%;
-  height: 70px;
+  height: 65px;
   border-bottom: solid;
   border-bottom-color: #999;
 }
@@ -130,7 +129,7 @@ header {
 .logo {
   flex: 1;
   width: 60px;
-  height: 60px;
+  height: 65px;
 }
 
 @media print {
