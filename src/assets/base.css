@@ -83,4 +83,7 @@ body {
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  /* 印刷時に背景色を適用するために追加 */
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
 }

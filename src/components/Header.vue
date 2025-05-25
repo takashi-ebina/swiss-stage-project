@@ -60,13 +60,14 @@ const reset = (): void => {
       <template v-slot:activator="{ props }">
         <img v-bind="props" @click="state.logoDialog = true" alt="logo" class="logo" :src="getImageUrl(state.logoName)" />
         <v-dialog v-model="state.logoDialog" width="auto">
-          <v-card width="500">
+          <v-card width="650">
             <v-card-title class="daialog-title">ロゴの選択</v-card-title>
             <v-sheet class="px-3">
               <div class="image-container">
                 <img alt="logo" class="pa-3" src="@/assets/igo.svg" @click="state.logoDialog = false; state.logoName='igo'" />
                 <img alt="logo" class="pa-3" src="@/assets/shogi.svg" @click="state.logoDialog = false; state.logoName='shogi'" />
                 <img alt="logo" class="pa-3" src="@/assets/chess.svg" @click="state.logoDialog = false; state.logoName='chess'" />
+                <img alt="logo" class="pa-3" src="@/assets/trophy.svg" @click="state.logoDialog = false; state.logoName='trophy'" />
               </div>
             </v-sheet>
           </v-card>
@@ -92,23 +93,35 @@ const reset = (): void => {
             :rules="[validatorUtil.checkTitleLength]">
           </v-text-field>
         </v-sheet>
+        <v-divider></v-divider>
         <template v-slot:actions>
-          <v-btn text="キャンセル" @click="state.titleDialog = false; state.inputTitle = state.title;"></v-btn>
-          <v-btn text="登録する"   @click="state.titleDialog = false; state.title = state.inputTitle;"></v-btn>
+          <v-btn class="bg-grey-lighten-2" text="キャンセル" @click="state.titleDialog = false; state.inputTitle = state.title;"></v-btn>
+          <v-btn class="bg-green-darken-1 text-white" text="登録する" @click="state.titleDialog = false; state.title = state.inputTitle;"></v-btn>
         </template>
       </v-card>
     </v-dialog>
-    
-    <v-btn prepend-icon="mdi-reload" class="reset-button bg-light-green-accent-4 text-white text-body-1 ma-1"
-      @click="reset();" text="リセット"></v-btn>
-    <v-btn prepend-icon="mdi-content-save" class="save-button bg-light-green-accent-4 text-white text-body-1 ma-1"
-      @click="save();" text="保存"></v-btn>
-    <v-btn prepend-icon="mdi-printer-outline" class="print-button bg-light-green-accent-4 text-white text-body-1 ma-1"
-      @click="print();" text="印刷"></v-btn>
+    <v-tooltip location="top" text="リセット">
+      <template v-slot:activator="{ props }">
+        <v-btn v-bind="props" icon="mdi-reload" class="reset-button text-white text-body-1" @click="reset();"></v-btn>
+      </template>
+    </v-tooltip>
+    <v-tooltip location="top" text="保存">
+      <template v-slot:activator="{ props }">
+        <v-btn v-bind="props" icon="mdi-content-save" class="save-button text-white text-body-1" @click="save();"></v-btn>
+      </template>
+    </v-tooltip>
+    <v-tooltip location="top" text="印刷">
+      <template v-slot:activator="{ props }">
+        <v-btn v-bind="props" icon="mdi-printer-outline" class="print-button text-white text-body-1" @click="print();"></v-btn>
+      </template>
+    </v-tooltip>
   </header>
 </template>
 
 <style scoped>
+img {
+  filter: brightness(0) saturate(100%) invert(96%) sepia(8%) saturate(300%) hue-rotate(42deg) brightness(97%) contrast(89%);
+}
 header {
   /* 横並び */
   display: flex;
@@ -117,19 +130,19 @@ header {
   place-items: center;
   width: 100%;
   height: 65px;
-  border-bottom: solid;
-  border-bottom-color: #999;
+  background: linear-gradient(to bottom right, #388E3C, #66BB6A);
 }
 
 .title {
   margin-right: auto;
+  color: #fff;
   flex: 6;
 }
 
 .logo {
   flex: 1;
   width: 60px;
-  height: 65px;
+  height: 60px;
 }
 
 @media print {
@@ -143,7 +156,7 @@ header {
 .title-daialog {
   font-size: 1rem;
   color: #fff;
-  background-color: hsla(160, 100%, 37%, 0.8);
+  background-color: #43A047;
 }
 
 .image-container {
@@ -155,7 +168,7 @@ header {
 }
 
 .image-container img {
-  max-width: 30%;
+  max-width: 20%;
   height: auto;
 }
 </style>

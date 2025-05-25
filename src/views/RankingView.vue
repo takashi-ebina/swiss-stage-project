@@ -30,9 +30,9 @@ function getResultClass(ranking: number) {
 </script>
 <template>
   <div class="ranking">
-    <v-row class="ranking-header justify-start ma-1">
-      <v-col cols="2">
-        <h2>ランキング</h2>
+    <v-row class="ranking-header ma-1">
+      <v-col cols="3" class="justify-start ">
+        <h2 class="headline"><b>ランキング</b></h2>
       </v-col>
     </v-row>
 
@@ -58,10 +58,17 @@ function getResultClass(ranking: number) {
       </div>
     </template>
     <template v-else>
-      <div class="d-flex align-center justify-center">
-        <v-sheet :elevation="3" :height="300" :width="1000" border rounded
-          class="d-flex align-center justify-center text-h3"> 参加者を登録してください</v-sheet>
-      </div>
+      <v-banner
+      class="my-4"
+      bg-color="green-lighten-5"
+      color="green-lighten-1"
+      icon="mdi-information"
+      lines="one"
+    >
+      <v-banner-text>
+        参加者を登録してください。
+      </v-banner-text>
+    </v-banner>
     </template>
   </div>
 </template>
@@ -70,7 +77,13 @@ function getResultClass(ranking: number) {
 .text-h3 {
   font-family: "游ゴシック", "メイリオ", "MSゴシック" !important;
 }
-
+.headline {
+  padding: .1em .1em .1em .5em;
+  border-left: solid .3em #388E3C;
+}
+.ranking-header {
+  max-height: 60px;
+}
 .ranking-container {
   /* 横並び */
   display: flex;
@@ -78,7 +91,6 @@ function getResultClass(ranking: number) {
   background: #FFF;
   padding: 20px;
 }
-
 .top-ranking {
   /* 縦並び */
   display: flex;
@@ -87,7 +99,6 @@ function getResultClass(ranking: number) {
   gap: 20px;
   padding: 10px;
 }
-
 /* フェードインアニメーション */
 @keyframes fadeIn {
   from {
@@ -102,7 +113,6 @@ function getResultClass(ranking: number) {
     transform: translateY(0);
   }
 }
-
 .top-ranking .rank {
   /* 横並び */
   display: flex;
@@ -120,7 +130,6 @@ function getResultClass(ranking: number) {
   border-radius: 5px;
   box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.3);
 }
-
 @media print {
   .gold {
     background-color: #ffd700 !important;
@@ -128,14 +137,12 @@ function getResultClass(ranking: number) {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
-
   .silver {
     background-color: #c0c0c0 !important;
     background-image: linear-gradient(90deg, #c0c0c0, #dcdcdc) !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
-
   .bronze {
     background-color: #cd7f32 !important;
     background-image: linear-gradient(90deg, #cd7f32, #b87333) !important;
@@ -143,26 +150,21 @@ function getResultClass(ranking: number) {
     print-color-adjust: exact !important;
   }
 }
-
 .gold {
   background: linear-gradient(90deg, #ffd700, #ffcc00);
   animation-delay: 0.1s!important;
 }
-
 .silver {
   background: linear-gradient(90deg, #c0c0c0, #dcdcdc);
   animation-delay: 0.3s!important;
 }
-
 .bronze {
   background: linear-gradient(90deg, #cd7f32, #b87333);
   animation-delay: 0.5s!important;
 }
-
 .other {
   animation-delay: 0.7s!important;
 }
-
 .other-ranking {
   /* 縦並び */
   display: flex;
@@ -171,7 +173,6 @@ function getResultClass(ranking: number) {
   gap: 5px;
   padding: 10px;
 }
-
 .other-ranking .rank {
   /* 横並び */
   display: flex;

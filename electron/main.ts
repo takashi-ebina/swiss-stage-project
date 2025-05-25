@@ -18,8 +18,10 @@ function createWindow() {
       nodeIntegration: false,
       contextIsolation: true,
       preload: path.join(__dirname, 'preload.js'),
-    }
+    },
   })
+
+  win.setMaximumSize(1280, 1200);
 
   if (process.env.NODE_ENV === "development") {
     win.loadURL('http://localhost:3000');

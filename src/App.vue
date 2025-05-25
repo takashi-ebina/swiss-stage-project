@@ -19,6 +19,7 @@ const state = reactive({
   defaultTitle: "",
   defaultLogoName: "",
   isReady: false,
+  rail: true,
 });
 
 onMounted(async () => {
@@ -76,25 +77,38 @@ onMounted(async () => {
 </script>
 
 <template>
-  <Header
-    v-if="state.isReady"
-    :defaultTitle="state.defaultTitle"
-    :defaultLogoName="state.defaultLogoName"
-  />
-  <div v-if="state.isReady">
-    <nav>
-      <RouterLink to="/">
-        <v-icon class="mr-2">mdi-home</v-icon> Home
-      </RouterLink>
-      <RouterLink to="/list">
-        <v-icon class="mr-2">mdi-format-list-bulleted</v-icon> List
-      </RouterLink>
-      <RouterLink to="/ranking">
-        <v-icon class="mr-2">mdi-trophy</v-icon> Ranking
-      </RouterLink>
-    </nav>
-  </div>
-  <RouterView v-if="state.isReady"/>
+  <v-app>
+    <v-app-bar flat>
+      <Header
+        v-if="state.isReady"
+        :defaultTitle="state.defaultTitle"
+        :defaultLogoName="state.defaultLogoName"
+      />
+    </v-app-bar>
+    <v-navigation-drawer
+      :rail="state.rail"
+      width="180"
+      permanent
+    >
+      <v-list>
+        <v-list-item
+          prepend-icon="mdi-view-list"
+          title="メニュー"
+          @click.stop="state.rail = !state.rail"
+        >
+        </v-list-item>
+      </v-list>
+      <v-divider></v-divider>
+      <v-list density="compact" nav>
+        <v-list-item prepend-icon="mdi-sword-cross" title="対戦表"  to="/" exact></v-list-item>
+        <v-list-item prepend-icon="mdi-account-group" title="参加者リスト"  to="/list" exact></v-list-item>
+        <v-list-item prepend-icon="mdi-trophy" title="ランキング"  to="/ranking" exact></v-list-item>
+      </v-list>
+    </v-navigation-drawer>
+    <v-main>
+      <router-view v-if="state.isReady"/>
+    </v-main>
+  </v-app>
 </template>
 
 <style scoped>
@@ -104,41 +118,8 @@ onMounted(async () => {
     display:none;
   }
 }
-nav {
-  width: 100%;
-  font-size: 12px;
-  text-align: center;
-  margin-top: 2rem;
-}
-
-nav a.router-link-exact-active {
-  color: var(--color-text);
-}
-
-nav a.router-link-exact-active:hover {
-  background-color: transparent;
-}
-
-nav a {
-  display: inline-block;
-  padding: 0 1rem;
-  border-left: 1px solid var(--color-border);
-}
-
-nav a:first-of-type {
-  border: 0;
-}
-
 .logo {
   margin: 0 2rem 0 0;
-}
-
-nav {
-  text-align: left;
-  margin-left: -1rem;
-  font-size: 1rem;
-  padding: 1rem 0;
-  margin-top: 1rem;
 }
 
 </style>
