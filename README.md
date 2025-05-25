@@ -19,16 +19,13 @@
 ## 画面
 
 ### 対戦表
-
-![対戦表](https://github.com/user-attachments/assets/b1c64f6d-f8c0-47ef-b187-91ac3a701ae3)
+![対戦表](https://github.com/user-attachments/assets/621915b0-712f-42ee-9310-53b6b554ae21)
 
 ### 参加者リスト
-
-![参加者リスト](https://github.com/user-attachments/assets/043f8fa7-d4e4-48a1-bde3-d60f9579cff0)
+![参加者リスト](https://github.com/user-attachments/assets/a3fe4c0e-0094-4ec4-b926-0de9d64f5658)
 
 ### ランキング
-
-![ランキング](https://github.com/user-attachments/assets/ce5829a2-982f-4e0f-8938-9c03adc0eeee)
+![ランキング](https://github.com/user-attachments/assets/a7da12b9-ba75-4b6c-b230-1de044f6da34)
 
 ## 使い方
 
