@@ -47,16 +47,15 @@ const registerPlayers = (): void => {
   
 };
 </script>
-
 <template>
   <div class="list">
-    <v-row class="list-header justify-start ma-1">
-      <v-col cols="2">
-        <h2>参加者リスト</h2>
+    <v-row class="list-header ma-1">
+      <v-col cols="3" class="justify-start">
+        <h2 class="headline"><b>参加者リスト</b></h2>
       </v-col>
-      <v-col cols="2">
-        <v-btn class="register-botton bg-light-green-accent-4 text-white text-body-1 ma-1 pa-4" block
-          @click="dialog = true">
+      <v-spacer></v-spacer>
+      <v-col cols="2" class="justify-end">
+        <v-btn class="register-botton bg-green-darken-1 text-white text-body-1" variant="text" @click="dialog = true">
           参加者の登録
         </v-btn>
       </v-col>
@@ -66,9 +65,10 @@ const registerPlayers = (): void => {
           <v-card-text>
             対戦表の結果がリセットされますが問題ないですか？
           </v-card-text>
+          <v-divider></v-divider>
           <template v-slot:actions>
-            <v-btn text="キャンセル" @click="dialog = false"></v-btn>
-            <v-btn text="登録する" @click="registerPlayers()"></v-btn>
+            <v-btn class="bg-grey-lighten-2" text="キャンセル" @click="dialog = false"></v-btn>
+            <v-btn class="bg-green-darken-1 text-white" text="登録する" @click="registerPlayers()"></v-btn>
           </template>
         </v-card>
       </v-dialog>
@@ -83,7 +83,7 @@ const registerPlayers = (): void => {
         </tr>
       </thead>
       <tbody class="list-table-body">
-        <tr v-for="(player, index) in $ProfileStore.profiles" :key="player.id">
+        <tr v-for="(player, index) in $ProfileStore.profiles" :key="player.id" :class="{'bg-grey-lighten-3':  index % 2 !== 0}">
           <td>{{ index + 1 }}</td>
           <td>
             <v-text-field v-model="player.organization" variant="underlined" density="compact" maxlength="30"
@@ -105,14 +105,19 @@ const registerPlayers = (): void => {
     </table>
   </div>
 </template>
-
 <style>
 @media print {
   .register-botton {
     display: none !important;
   }
 }
-
+.headline {
+  padding: .1em .1em .1em .5em;
+  border-left: solid .3em #388E3C;
+}
+.list-header {
+  max-height: 60px;
+}
 .list-table-design {
   /* テーブルのヘッダーを固定にするために、テーブル内のセルの境界を分離 */
   border-collapse: separate;
@@ -123,48 +128,41 @@ const registerPlayers = (): void => {
   text-align: center;
   margin: auto;
 }
-
 .list-table-header th {
   /* ヘッダーを画面上部の位置で固定 */
   position: sticky;
-  top: 0;
+  /* 画面全体のヘッダーの高さに合わせる */
+  top: 65px;
   z-index: 1;
   padding: .5em;
-  border-top: 2px solid #64dd17;
-  border-bottom: 2px solid #64dd17;
-  color: #64dd17;
+  border-top: 2px solid #388E3C;
+  border-bottom: 2px solid #388E3C;
+  color: #388E3C;
   background-color: #fff;
 }
-
 .list-table-body th,
 .list-table-body td {
   /* ホワイトスペースを統合するが、行は折り返さない */
   white-space: nowrap;
   padding: .01em .5em;
 }
-
 .list-table-header-no {
   width: 10px;
 }
-
 .list-table-header-organization {
   width: 400px;
 }
-
 .list-table-header-name {
   width: 400px;
 }
-
 .list-table-header-rank {
   width: 100px;
 }
-
 .daialog-title {
   font-size: 1rem;
   color: #fff;
-  background-color: hsla(160, 100%, 37%, 0.8);
+  background-color: #43A047;
 }
-
 .required::after {
   content: " *";
   color: #ff4b00;

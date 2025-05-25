@@ -15,13 +15,12 @@ import type { Round } from "@/types/round";
 const $PlayerStore = usePlayerStore();
 const $toast = useToast();
 const selectedRound = ref<Round>({ value: 1 });
-  
+
 watch($PlayerStore.players, (newPlayers) => {
   playerUtil.updatePlayerMatchScore(newPlayers);
 },
   { deep: true }
 );
-
 /**
  * 勝敗の結果に対応したクラス名を返却する
  * @param {Result} result 勝敗の結果
@@ -40,7 +39,6 @@ const getResultClass = (result: Result): string => {
       return "";
   }
 }
-
 /**
  * セレクトボックスで選択した回戦に対して、対戦相手をマッチさせる
  */
@@ -74,9 +72,7 @@ const setOpponent = (): void => {
   } else {
     $toast.success("対戦相手を設定しました!", { position: "top" });
   }
-  
 }
-
 /**
  * 対戦相手がマッチしないプレイヤーがいるかどうか
  * @returns {boolean} 対戦相手がマッチしない参加者がいる場合はtrue、それ以外の場合はfalseを返却する
@@ -86,7 +82,6 @@ const existsNoMatchPlayer = (): boolean => {
     .map((player) => player.matches[selectedRound.value.value - 1].opponentId)
     .includes(constant.OPPONENT_PLAYER_NO_MATCH);
 }
-
 /**
  * 選択した回戦において、既に対戦相手が設定されているか
  * @param {Player} player プレイヤー
@@ -96,7 +91,6 @@ const existsNoMatchPlayer = (): boolean => {
 const hasOpponentInRound = (player: Player, selectedRound: number): boolean => {
   return player.matches[selectedRound - 1].opponentId !== "";
 }
-
 /**
  * 既に対戦したことある相手であるか
  * @param {Player} player プレイヤー
@@ -112,7 +106,6 @@ const hasAlreadyMatched = (player: Player, opponentPlayer: Player, currentRound:
   }
   return false;
 }
-
 /**
  * プレイヤーの対戦結果を更新した後に呼ばれる処理
  * 対戦相手の結果の更新とプレイヤー、対戦相手の勝ち点の更新を行う
@@ -123,26 +116,25 @@ const hasAlreadyMatched = (player: Player, opponentPlayer: Player, currentRound:
 const onResultChange = (match: Match, currentRound: number, ownPlayerIndex: number): void => {
   playerUtil.updatePlayerPoints($PlayerStore.players, match, currentRound, ownPlayerIndex);
 }
-
 </script>
-
 <template>
   <div class="home">
-    <v-row class="home-header justify-start ma-1">
-      <v-col cols="2">
-        <h2>対戦表</h2>
+    <v-row class="home-header ma-1">
+      <v-col cols="3" class="justify-start">
+        <h2 class="headline"><b>対戦表</b></h2>
       </v-col>
-      <v-col cols="2">
-        <v-btn class="setting-botton bg-light-green-accent-4 text-white text-body-1 ma-1 pa-4" block @click="setOpponent">
-          対戦相手の設定
-        </v-btn>
-      </v-col>
-      <v-col cols="1">
+      <v-spacer></v-spacer>
+      <v-col cols="1" class="justify-end">
         <v-select class="round-select" v-model="selectedRound" label="○回戦" :items="roundOptions" item-title="value"
           item-value="value" return-object variant="underlined">
         </v-select>
       </v-col>
-    </v-row>
+      <v-col cols="2" class="justify-end">
+        <v-btn class="setting-botton bg-green-darken-1 text-white text-body-1" variant="text" @click="setOpponent">
+          対戦相手の設定
+        </v-btn>
+       </v-col>
+     </v-row>
     <table class="home-table-design">
       <thead class="home-table-header">
         <tr>
@@ -186,7 +178,7 @@ const onResultChange = (match: Match, currentRound: number, ownPlayerIndex: numb
         </tr>
       </thead>
       <tbody class="home-table-body">
-        <tr v-for="(player, index) in $PlayerStore.players" :key="player.profile.id">
+        <tr v-for="(player, index) in $PlayerStore.players" :key="player.profile.id" :class="{'bg-grey-lighten-3':  index % 2 !== 0}">
           <td>{{ index + 1 }}</td>
           <td class="home-table-body-name">{{ player.profile.name }}</td>
           <td>{{ player.profile.rank.name }}</td>
@@ -218,7 +210,6 @@ const onResultChange = (match: Match, currentRound: number, ownPlayerIndex: numb
     </table>
   </div>
 </template>
-
 <style>
 @media print {
   .setting-botton,
@@ -227,7 +218,13 @@ const onResultChange = (match: Match, currentRound: number, ownPlayerIndex: numb
     display: none !important;
   }
 }
-
+.headline {
+  padding: .1em .1em .1em .5em;
+  border-left: solid .3em #388E3C;
+}
+.home-header {
+  max-height: 60px;
+}
 .home-table-design {
   /* テーブルのヘッダーを固定にするために、テーブル内のセルの境界を分離 */
   border-collapse: separate;
@@ -239,58 +236,49 @@ const onResultChange = (match: Match, currentRound: number, ownPlayerIndex: numb
   text-align: center;
   margin: auto;
 }
-
 .home-table-header th {
   /* ヘッダーを画面上部の位置で固定 */
   position: sticky;
-  top: 0;
+  /* 画面全体のヘッダーの高さに合わせる */
+  top: 65px;
   z-index: 1;
   padding: .5em;
-  border-top: 2px solid #64dd17;
-  border-bottom: 2px solid #64dd17;
-  color: #64dd17;
+  border-top: 2px solid #388E3C;
+  border-bottom: 2px solid #388E3C;
+  color: #388E3C;
   background-color: #fff;
 }
-
 .home-table-header-match {
   /* 線の重なりを防ぐ */
   border-top: none !important;
-  top: 2.85em !important;
+   /* 画面全体のヘッダー + テーブルヘッダーの1段目の高さに合わせる */
+  top: 108px !important;
 }
-
 .home-table-body th,
 .home-table-body td {
   /* ホワイトスペースを統合するが、行は折り返さない */
   white-space: nowrap;
   padding: .01em .5em;
 }
-
 .home-table-body-name {
   width: 150px;
 }
-
 .home-table-body-match-no {
   width: 60px;
 }
-
 .home-table-body-matches-opponent {
   width: 45px;
 }
-
 .home-table-body-matches-result {
   width: 65px;
 }
-
 .result-win {
-  background-color: rgba(0, 255, 0, 0.2);
+  background-color: #B9F6CA; /* green-accent-1 */
 }
-
 .result-lose {
-  background-color: rgba(255, 0, 0, 0.2);
+  background-color: #FFCDD2; /* red-lighten-4 */
 }
-
 .result-draw {
-  background-color: rgba(255, 255, 0, 0.2);
+  background-color: #FFF9C4; /* yellow-lighten-4 */
 }
-
 </style>
