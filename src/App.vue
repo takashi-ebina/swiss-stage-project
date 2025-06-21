@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { RouterLink, RouterView } from 'vue-router'
+import { RouterView } from 'vue-router'
 import { onMounted, reactive } from 'vue';
 import Header from './components/Header.vue'
 import { util } from "@/utils/util";
@@ -29,36 +29,46 @@ onMounted(async () => {
   const matchDtoList: MatchDto[] = await window.electronAPI.findAllMatches();
   const TitleInfoDtoList: TitleInfoDto[] = await window.electronAPI.findOneTitleInfo();
 
+  // DBに保存されているデータは初期表示時に画面に表示させる
+  // TODO ??演算子で代用できる？？
   if (!util.isNullOrUndefined(profileDtoList) && profileDtoList.length >= 1) {
+    // 参加者リストのデータが保存されている場合
     const savedProfiles: Profile[] = profileDtoList
       .map((profileDto) => Profile.fromDto(profileDto))
       .filter(profile => profile.name.trim() !== "" || profile.rank.name.trim() !== "");
+
     $ProfileStore.profiles = savedProfiles;
     if (!util.isNullOrUndefined(matchDtoList) && matchDtoList.length >= 1) {
-      const matchDtoListGroupedById: Record<number, MatchDto[]> = {};
+      // 対戦結果のデータが保存されている場合、対戦結果のデータを参加者ごとにグルーピングする
+      const matchDtoListGroupedById: Record<string, MatchDto[]> = {};
         for (const match of matchDtoList) {
-          if (!matchDtoListGroupedById[match.id]) {
-            matchDtoListGroupedById[match.id] = [];
+          if (!matchDtoListGroupedById[getMatchKey(match)]) {
+            matchDtoListGroupedById[getMatchKey(match)] = [];
           }
-          matchDtoListGroupedById[match.id].push(match);
+          matchDtoListGroupedById[getMatchKey(match)].push(match);
         }
         const savedPlayers: Player[] = profileDtoList
-          .map((profileDto, index) => Player.fromDtos(profileDto, matchDtoListGroupedById[index + 1]))
+          .map((profileDto) => Player.fromDtos(profileDto, matchDtoListGroupedById[getProfileKey(profileDto)]))
           .filter(player => player.profile.name.trim() !== "" || player.profile.rank.name.trim() !== "");
         $PlayerStore.players = savedPlayers;
     } else {
+      // 対戦結果のデータが保存されていない場合、参加者のデータだけ設定する
       savedProfiles.forEach((profile, index) => {
         $PlayerStore.players[index].profile = profile;
       });
     }
-    while ($ProfileStore.profiles.length < constant.PLAYER_MAX_SIZE) {
-      const tmpProfile = new Profile($ProfileStore.profiles.length + 1);
-      $ProfileStore.profiles.push(tmpProfile);
-      $PlayerStore.players.push(new Player(tmpProfile));
+
+    for (let groupIdx:number = 1; groupIdx <= constant.GROUP_SIZE; groupIdx++) {
+      const groupedProfiles = $ProfileStore.profiles.filter(profile => profile.group_id == groupIdx);
+      while (groupedProfiles.length < constant.PLAYER_MAX_SIZE) {
+        const tmpProfile = new Profile(groupIdx, groupedProfiles.length + 1); 
+        $ProfileStore.profiles.push(tmpProfile);
+        $PlayerStore.players.push(Player.fromGroupId(groupIdx));
+      }
     }
-    $PlayerStore.players.forEach((player, playerIndex) => {
+    $PlayerStore.players.forEach((player) => {
       player.matches.forEach((match, matchIndex) => {
-        playerUtil.updatePlayerPoints($PlayerStore.players, match, matchIndex, playerIndex);
+        playerUtil.updatePlayerPoints($PlayerStore.players, player, match, matchIndex);
       });
     });
     playerUtil.updatePlayerMatchScore($PlayerStore.players);
@@ -73,6 +83,14 @@ onMounted(async () => {
   }
   state.isReady = true;
 });
+
+// TODO ロジックが外に漏れ出ているので、本当はこんなところに実装したくない、、苦肉の策、、、
+const getMatchKey = (match: MatchDto): string =>{
+  return match.group_id + "@" + match.id;
+}
+const getProfileKey = (profile: ProfileDto): string =>{
+  return profile.group_id + "@" + profile.id;
+}
 
 </script>
 

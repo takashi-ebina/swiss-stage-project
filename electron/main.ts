@@ -55,7 +55,7 @@ function getDbPath() {
   if (!fs.existsSync(dbFolder)) {
     fs.mkdirSync(dbFolder, { recursive: true });
   }
-  return path.join(dbFolder, 'swiss-stage-project.db');
+  return path.join(dbFolder, 'swiss-stage-project_v2.db');
 }
 
 ipcMain.handle('find-all-profiles', async () => {
@@ -89,10 +89,10 @@ ipcMain.handle('init-db', async () => {
   const db = new sqlite3.Database(getDbPath());
   try {
     await util.promisify(db.run).call(
-      db,"create table if not exists profile (id integer, organization text, name text, rank integer)"
+      db,"create table if not exists profile (group_id integer, id integer, organization text, name text, rank integer)"
     );
     await util.promisify(db.run).call(
-      db,"create table if not exists match (id integer, idx integer, opponent_id text, result integer)"
+      db,"create table if not exists match (group_id integer, id integer, idx integer, opponent_id text, result integer)"
     );
     await util.promisify(db.run).call(
       db,"create table if not exists title_info (logo_name text, title text)"
@@ -105,21 +105,21 @@ ipcMain.handle('init-db', async () => {
   }
 })
 
-ipcMain.handle('save', async (_event, profileDto: ProfileDto, matchDtoList: MatchDto[]) => {
+ipcMain.handle('save', async (_event, groupId: number, profileDto: ProfileDto, matchDtoList: MatchDto[]) => {
   console.log("[SAVE] profileDto:", profileDto);
   console.log("[SAVE] matchDtoList:", matchDtoList);
   const db = new sqlite3.Database(getDbPath());
   try {
-    const profileInsertStatement = db.prepare("INSERT INTO profile VALUES (?,?,?,?)");
+    const profileInsertStatement = db.prepare("INSERT INTO profile VALUES (?,?,?,?,?)");
     await util.promisify(profileInsertStatement.run
-      .bind(profileInsertStatement, [profileDto.id, profileDto.organization, profileDto.name, profileDto.rank]))
+      .bind(profileInsertStatement, [groupId, profileDto.id, profileDto.organization, profileDto.name, profileDto.rank]))
       .call(profileInsertStatement);
     await util.promisify(profileInsertStatement.finalize).call(profileInsertStatement);
 
-    const matchInsertStatement = db.prepare("INSERT INTO match VALUES (?,?,?,?)");
+    const matchInsertStatement = db.prepare("INSERT INTO match VALUES (?,?,?,?,?)");
     for (const matchDto of matchDtoList) {
       await util.promisify(matchInsertStatement.run
-        .bind(matchInsertStatement, [matchDto.id, matchDto.idx, matchDto.opponent_id, matchDto.result]))
+        .bind(matchInsertStatement, [groupId, matchDto.id, matchDto.idx, matchDto.opponent_id, matchDto.result]))
         .call(matchInsertStatement);
     }
     await util.promisify(matchInsertStatement.finalize).call(matchInsertStatement);

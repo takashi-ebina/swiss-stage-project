@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, reactive } from 'vue'
+import { reactive } from 'vue'
 import { validatorUtil } from '@/utils/validatorUtil';
 import { useProfileStore } from "@/stores/profileStore";
 import { usePlayerStore } from "@/stores/playerStore";
@@ -46,8 +46,10 @@ const print = (): void => {
   window.print();
 }
 const reset = (): void => {
-  $ProfileStore.profiles = Array.from({ length: constant.PLAYER_MAX_SIZE }, () => new Profile());
-  $PlayerStore.players = Array.from({ length: constant.PLAYER_MAX_SIZE }, () => new Player());
+  $ProfileStore.profiles = Array.from({ length: constant.GROUP_SIZE }, (_, groupIdx) =>
+    Array.from({ length: constant.PLAYER_MAX_SIZE }, () => new Profile(groupIdx + 1))).flat();
+  $PlayerStore.players  = Array.from({ length: constant.GROUP_SIZE }, (_, groupIdx) =>
+    Array.from({ length: constant.PLAYER_MAX_SIZE }, () => Player.fromGroupId(groupIdx))).flat();
   state.logoName = "igo";
   state.title = "swiss-stage-project";
   state.inputTitle = "swiss-stage-project";
@@ -120,6 +122,7 @@ const reset = (): void => {
 
 <style scoped>
 img {
+  /* 参考URL：https://angel-rs.github.io/css-color-filter-generator */
   filter: brightness(0) saturate(100%) invert(96%) sepia(8%) saturate(300%) hue-rotate(42deg) brightness(97%) contrast(89%);
 }
 header {
@@ -132,33 +135,28 @@ header {
   height: 65px;
   background: linear-gradient(to bottom right, #388E3C, #66BB6A);
 }
-
 .title {
   margin-right: auto;
   color: #fff;
   flex: 6;
 }
-
 .logo {
   flex: 1;
   width: 60px;
   height: 60px;
 }
-
 @media print {
   .print-button, .save-button, .reset-button,
   .title-edit-icon {
     display: none;
   }
 }
-
 .logo-daialog,
 .title-daialog {
   font-size: 1rem;
   color: #fff;
   background-color: #43A047;
 }
-
 .image-container {
   /* 横並び */
   display: flex;
@@ -166,7 +164,6 @@ header {
   /* 均等に配置 */
   justify-content: space-around;
 }
-
 .image-container img {
   max-width: 20%;
   height: auto;

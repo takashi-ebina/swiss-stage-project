@@ -12,11 +12,12 @@ import { Result } from "@/models/result";
 import { Match } from "@/models/match";
 import type { Round } from "@/types/round";
 
-const $PlayerStore = usePlayerStore();
+// TODO 親コンポーネントからGroupIdを渡してもらう
+const groupedPlayerStore = usePlayerStore().getPlayersByGroupId(1);
 const $toast = useToast();
 const selectedRound = ref<Round>({ value: 1 });
 
-watch($PlayerStore.players, (newPlayers) => {
+watch(groupedPlayerStore, (newPlayers) => {
   playerUtil.updatePlayerMatchScore(newPlayers);
 },
   { deep: true }
@@ -43,14 +44,14 @@ const getResultClass = (result: Result): string => {
  * セレクトボックスで選択した回戦に対して、対戦相手をマッチさせる
  */
 const setOpponent = (): void => {
-  for (const player of $PlayerStore.players) {
+  for (const player of groupedPlayerStore) {
     if (player.profile.name.trim() === "") break;
     if (hasOpponentInRound(player, selectedRound.value.value)) continue;
     // いったん仮で-99を設定する
     player.matches[selectedRound.value.value - 1].opponentId = constant.OPPONENT_PLAYER_NO_MATCH;
     // 毎回、Noの昇順で対戦相手を探すと、組み合わせに偏りが出そうなので、
     // 偶数の回戦の場合はNoの降順で対戦相手を探すようにしているが意味あるかはわからない・・
-    const tmpPlayers = selectedRound.value.value % 2 !== 0 ? $PlayerStore.players : [...$PlayerStore.players].reverse();
+    const tmpPlayers = selectedRound.value.value % 2 !== 0 ? groupedPlayerStore : [...groupedPlayerStore].reverse();
     for (const opponentPlayer of tmpPlayers) {
       if (player.profile.id === opponentPlayer.profile.id
         || opponentPlayer.profile.name.trim() === ""
@@ -78,7 +79,7 @@ const setOpponent = (): void => {
  * @returns {boolean} 対戦相手がマッチしない参加者がいる場合はtrue、それ以外の場合はfalseを返却する
  */
 const existsNoMatchPlayer = (): boolean => {
-  return $PlayerStore.players
+  return groupedPlayerStore
     .map((player) => player.matches[selectedRound.value.value - 1].opponentId)
     .includes(constant.OPPONENT_PLAYER_NO_MATCH);
 }
@@ -114,7 +115,7 @@ const hasAlreadyMatched = (player: Player, opponentPlayer: Player, currentRound:
  * @param {number} ownPlayerIndex プレイヤーのインデックス
  */
 const onResultChange = (match: Match, currentRound: number, ownPlayerIndex: number): void => {
-  playerUtil.updatePlayerPoints($PlayerStore.players, match, currentRound, ownPlayerIndex);
+  playerUtil.updatePlayerPoints(groupedPlayerStore, groupedPlayerStore[ownPlayerIndex] ,match, currentRound);
 }
 </script>
 <template>
@@ -178,7 +179,7 @@ const onResultChange = (match: Match, currentRound: number, ownPlayerIndex: numb
         </tr>
       </thead>
       <tbody class="home-table-body">
-        <tr v-for="(player, index) in $PlayerStore.players" :key="player.profile.id" :class="{'bg-grey-lighten-3':  index % 2 !== 0}">
+        <tr v-for="(player, index) in groupedPlayerStore" :key="player.profile.id" :class="{'bg-grey-lighten-3':  index % 2 !== 0}">
           <td>{{ index + 1 }}</td>
           <td class="home-table-body-name">{{ player.profile.name }}</td>
           <td>{{ player.profile.rank.name }}</td>

@@ -2,9 +2,10 @@
 import { computed } from 'vue'
 import { usePlayerStore } from "@/stores/playerStore";
 
-const $PlayerStore = usePlayerStore();
+// TODO 親コンポーネントからGroupIdを渡してもらう
+const groupedPlayerStore = usePlayerStore().getPlayersByGroupId(1);
 const filteredPlayers = computed(() => {
-  const rankingSortedPlayers = $PlayerStore.players.slice().filter((player) => player.profile.name !== "");
+  const rankingSortedPlayers = groupedPlayerStore.slice().filter((player) => player.profile.name !== "");
   rankingSortedPlayers.sort((a, b) => b.rankingScore - a.rankingScore);
   return rankingSortedPlayers;
 })

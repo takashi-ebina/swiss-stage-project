@@ -10,10 +10,12 @@ import { validatorUtil } from '@/utils/validatorUtil';
 import { Profile } from "@/models/profile";
 import { constant } from '@/constants/constant';
 
-let $PlayerStore = usePlayerStore();
-const $ProfileStore = useProfileStore();
+let playerStore = usePlayerStore();
 const $toast = useToast();
 const dialog = ref(false);
+
+// TODO 親コンポーネントからGroupIdを渡してもらう
+const groupedProfilesStore = useProfileStore().getProfilesByGroupId(1);
 
 /**
  * プレイヤーの一覧を登録する
@@ -21,28 +23,28 @@ const dialog = ref(false);
 const registerPlayers = (): void => {
   let existsDummyPlayer: boolean = false;
   dialog.value = false;
-  if (!validatorUtil.validateprofiles($ProfileStore.profiles)) {
+  if (!validatorUtil.validateProfiles(groupedProfilesStore)) {
     $toast.error("名前と段級位は両方入力するか、両方空にしてください", { position: "top" });
     return;
   } 
-
-  $ProfileStore.profiles.sort((a, b) => a.rank.value - b.rank.value);
-
   // IDを振り直し、不要なプレイヤーを削除
-  $ProfileStore.profiles = $ProfileStore.profiles
+  groupedProfilesStore
+    .sort((a, b) => a.rank.value - b.rank.value)
     .map((profile, index) => profile.updateProfileId(index + 1))
     .filter(profile => profile.name.trim() !== "" || profile.rank.name.trim() !== "");
 
   // 奇数ならダミープレイヤーを追加
-  if ($ProfileStore.profiles.length % 2 !== 0) {
-    $ProfileStore.profiles.push(new Profile($ProfileStore.profiles.length + 1, "", "ダミーユーザー", { name: "20級", value: 20 }));
+  if (groupedProfilesStore.length % 2 !== 0) {
+    groupedProfilesStore.push(new Profile(1, groupedProfilesStore.length + 1, "", "ダミーユーザー", { name: "20級", value: 20 }));
     existsDummyPlayer = true;
   }
   // プレイヤーの要素数が 32 未満の場合、空のプレイヤーを追加
-  while ($ProfileStore.profiles.length < constant.PLAYER_MAX_SIZE) {
-    $ProfileStore.profiles.push(new Profile($ProfileStore.profiles.length + 1));
+  while (groupedProfilesStore.length < constant.PLAYER_MAX_SIZE) {
+    groupedProfilesStore.push(new Profile(groupedProfilesStore.length + 1));
   }
-  $PlayerStore.players = $ProfileStore.profiles.map(p => new Player(p.clone()));
+
+  // TODO 親コンポーネントからGroupIdを渡してもらう
+  playerStore.players = groupedProfilesStore.map(p => Player.fromProfile(1, p.clone()));
   $toast.success("登録に成功しました!" + (existsDummyPlayer ? "<br><br>参加者が奇数のため、ダミーユーザーを追加しています" : ""), { position: "top" });
   
 };
@@ -83,7 +85,7 @@ const registerPlayers = (): void => {
         </tr>
       </thead>
       <tbody class="list-table-body">
-        <tr v-for="(player, index) in $ProfileStore.profiles" :key="player.id" :class="{'bg-grey-lighten-3':  index % 2 !== 0}">
+        <tr v-for="(player, index) in groupedProfilesStore" :key="player.id" :class="{'bg-grey-lighten-3':  index % 2 !== 0}">
           <td>{{ index + 1 }}</td>
           <td>
             <v-text-field v-model="player.organization" variant="underlined" density="compact" maxlength="30"
