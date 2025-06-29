@@ -24,10 +24,12 @@ const state = reactive({
 
 onMounted(async () => {
   await window.electronAPI.initDb();
-
   const profileDtoList: ProfileDto[] = await window.electronAPI.findAllProfiles();
   const matchDtoList: MatchDto[] = await window.electronAPI.findAllMatches();
-  const TitleInfoDtoList: TitleInfoDto[] = await window.electronAPI.findOneTitleInfo();
+  const titleInfoDtoList: TitleInfoDto[] = await window.electronAPI.findOneTitleInfo();
+  console.log('profileDtoList:',profileDtoList);
+  console.log('matchDtoList:',matchDtoList);
+  console.log('titleInfoDtoList:',titleInfoDtoList);
 
   // DBに保存されているデータは初期表示時に画面に表示させる
   // TODO ??演算子で代用できる？？
@@ -59,9 +61,10 @@ onMounted(async () => {
     }
 
     for (let groupIdx:number = 1; groupIdx <= constant.GROUP_SIZE; groupIdx++) {
-      const groupedProfiles = $ProfileStore.profiles.filter(profile => profile.group_id == groupIdx);
-      while (groupedProfiles.length < constant.PLAYER_MAX_SIZE) {
-        const tmpProfile = new Profile(groupIdx, groupedProfiles.length + 1); 
+      const existing = $ProfileStore.profiles.filter(p => p.group_id === groupIdx);
+      const missingCount = constant.PLAYER_MAX_SIZE - existing.length;
+      for (let i = 1; i <= missingCount; i++) {
+        const tmpProfile = new Profile(groupIdx, existing.length + i);
         $ProfileStore.profiles.push(tmpProfile);
         $PlayerStore.players.push(Player.fromGroupId(groupIdx));
       }
@@ -71,12 +74,14 @@ onMounted(async () => {
         playerUtil.updatePlayerPoints($PlayerStore.players, player, match, matchIndex);
       });
     });
-    playerUtil.updatePlayerMatchScore($PlayerStore.players);
+    for (let groupIdx:number = 1; groupIdx <= constant.GROUP_SIZE; groupIdx++) {
+      playerUtil.updatePlayerMatchScore($PlayerStore.players, groupIdx);
+    }
   }
 
-  if (!util.isNullOrUndefined(TitleInfoDtoList) && TitleInfoDtoList.length >= 1) {
-    state.defaultTitle = TitleInfoDtoList[0].title;
-    state.defaultLogoName = TitleInfoDtoList[0].logo_name;
+  if (!util.isNullOrUndefined(titleInfoDtoList) && titleInfoDtoList.length >= 1) {
+    state.defaultTitle = titleInfoDtoList[0].title;
+    state.defaultLogoName = titleInfoDtoList[0].logo_name;
   } else {
     state.defaultTitle = "swiss-stage-project";
     state.defaultLogoName = "igo"; 

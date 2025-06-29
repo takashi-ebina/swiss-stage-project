@@ -32,11 +32,13 @@ const updatePlayerPoints = (
 /**
  * プレイヤーのsos、sodos、rankingScore、rankingの更新を行う
  * @param {Player[]} players プレイヤー
+ * @param {Number} groupId グループID
  */
 const updatePlayerMatchScore = (
-  players: Player[]
+  players: Player[],
+  groupId: Number,
 ): void => {
-  players.forEach((player) => {
+  getPlayersByGroupId(players, groupId).forEach((player) => {
     player.sos = player.matches
       .filter((match) => match.isValidOpponent())
       .map((match) => {
@@ -72,9 +74,14 @@ const findOpponentPlayer = (
   );
 }
 
+const getPlayersByGroupId = (players: Player[], groupId: Number): Player[] => {
+  return players.filter(players => players.profile.group_id === groupId);
+};
+
 export const playerUtil = {
     updatePlayerPoints,
     updatePlayerMatchScore,
-    findOpponentPlayer
+    findOpponentPlayer,
+    getPlayersByGroupId,
 }
 

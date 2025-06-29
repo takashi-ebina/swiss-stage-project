@@ -10,7 +10,7 @@ declare global {
       findAllProfiles: () => Promise<ProfileDto[]>
       findAllMatches: () => Promise<MatchDto[]>
       findOneTitleInfo: () => Promise<TitleInfoDto[]>
-      save: (profileDto: ProfileDto, matchDtoList: MatchDto[]) => Promise<void>
+      save: (groupId: number, profileDto: ProfileDto, matchDtoList: MatchDto[]) => Promise<void>
       saveTitleInfo: (titleInfoDto: TitleInfoDto) => Promise<void>
       delete: () => Promise<void>
     }

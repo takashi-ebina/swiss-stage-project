@@ -59,33 +59,40 @@ function getDbPath() {
 }
 
 ipcMain.handle('find-all-profiles', async () => {
+  console.log("[START] find-all-profiles");
   const db = new sqlite3.Database(getDbPath());
   const result = await util.promisify(
-    db.all.bind(db, 'select id, organization, name, rank from profile order by id')
+    db.all.bind(db, 'select group_id, id, organization, name, rank from profile order by id')
   ).call(db) as ProfileDto[];
   await util.promisify(db.close).call(db);
+  console.log("[ END ] find-all-profiles");
   return result;
 })
 
 ipcMain.handle('find-all-matches', async () => {
+  console.log("[START] find-all-matches");
   const db = new sqlite3.Database(getDbPath());
   const result = await util.promisify(
-    db.all.bind(db, 'select id, idx, opponent_id, result from match order by id')
+    db.all.bind(db, 'select group_id, id, idx, opponent_id, result from match order by id')
   ).call(db) as MatchDto[];
   await util.promisify(db.close).call(db);
+  console.log("[ END ] find-all-matches");
   return result;
 })
 
 ipcMain.handle('find-one-title-info', async () => {
+  console.log("[START] find-one-title-info");
   const db = new sqlite3.Database(getDbPath());
   const result = await util.promisify(
     db.all.bind(db, 'select logo_name, title from title_info limit 1')
   ).call(db) as TitleInfoDto[];
   await util.promisify(db.close).call(db);
+  console.log("[ END ] find-one-title-info");
   return result;
 })
 
 ipcMain.handle('init-db', async () => {
+  console.log("[START] init-db");
   const db = new sqlite3.Database(getDbPath());
   try {
     await util.promisify(db.run).call(
@@ -101,21 +108,23 @@ ipcMain.handle('init-db', async () => {
     console.error('DB error:', err);
     throw err;
   } finally {
+    console.log("[ END ] init-db");
     await util.promisify(db.close).call(db);
   }
 })
 
 ipcMain.handle('save', async (_event, groupId: number, profileDto: ProfileDto, matchDtoList: MatchDto[]) => {
-  console.log("[SAVE] profileDto:", profileDto);
-  console.log("[SAVE] matchDtoList:", matchDtoList);
+  console.log("[START] init-db");
   const db = new sqlite3.Database(getDbPath());
   try {
+    console.log("[SAVE] profileDto:", profileDto);
     const profileInsertStatement = db.prepare("INSERT INTO profile VALUES (?,?,?,?,?)");
     await util.promisify(profileInsertStatement.run
       .bind(profileInsertStatement, [groupId, profileDto.id, profileDto.organization, profileDto.name, profileDto.rank]))
       .call(profileInsertStatement);
     await util.promisify(profileInsertStatement.finalize).call(profileInsertStatement);
 
+    console.log("[SAVE] matchDtoList:", matchDtoList);
     const matchInsertStatement = db.prepare("INSERT INTO match VALUES (?,?,?,?,?)");
     for (const matchDto of matchDtoList) {
       await util.promisify(matchInsertStatement.run
@@ -127,11 +136,13 @@ ipcMain.handle('save', async (_event, groupId: number, profileDto: ProfileDto, m
     console.error('DB error:', err);
     throw err;
   } finally {
+    console.log("[ END ] init-db");
     await util.promisify(db.close).call(db);
   }
 })
 
 ipcMain.handle('save-title-info', async (_event, titleInfoDto: TitleInfoDto) => {
+  console.log("[START] save-title-info");
   console.log("[SAVE] titleInfoDto:", titleInfoDto);
   const db = new sqlite3.Database(getDbPath());
   try {
@@ -144,11 +155,13 @@ ipcMain.handle('save-title-info', async (_event, titleInfoDto: TitleInfoDto) => 
     console.error('DB error:', err);
     throw err;
   } finally {
+    console.log("[ END ] save-title-info");
     await util.promisify(db.close).call(db);
   }
 })
 
 ipcMain.handle('delete', async () => {
+  console.log("[START] delete");
   const db = new sqlite3.Database(getDbPath());
   try {
     await util.promisify(db.run).call(
@@ -164,6 +177,7 @@ ipcMain.handle('delete', async () => {
     console.error('DB error:', err);
     throw err;
   } finally {
+    console.log("[ END ] delete");
     await util.promisify(db.close).call(db);
   }
 })

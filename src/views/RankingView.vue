@@ -1,189 +1,33 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { usePlayerStore } from "@/stores/playerStore";
-
-// TODO 親コンポーネントからGroupIdを渡してもらう
-const groupedPlayerStore = usePlayerStore().getPlayersByGroupId(1);
-const filteredPlayers = computed(() => {
-  const rankingSortedPlayers = groupedPlayerStore.slice().filter((player) => player.profile.name !== "");
-  rankingSortedPlayers.sort((a, b) => b.rankingScore - a.rankingScore);
-  return rankingSortedPlayers;
-})
-
-/**
- * 順位に応じたクラス名を返却する
- * @param {number} ranking 勝敗の結果
- * @returns {string} クラス名
- */
-function getResultClass(ranking: number) {
-  if (!ranking) return "";
-  switch (ranking) {
-    case 1:
-      return "gold";
-    case 2:
-      return "silver";
-    case 3:
-      return "bronze";
-    default:
-      return "";
-  }
-}
+import { reactive } from 'vue'
+import Ranking from '@/components/Ranking.vue'
+const state = reactive({
+  tab: 1,
+});
 </script>
 <template>
-  <div class="ranking">
-    <v-row class="ranking-header ma-1">
-      <v-col cols="3" class="justify-start ">
-        <h2 class="headline"><b>ランキング</b></h2>
-      </v-col>
-    </v-row>
-
-    <template v-if="filteredPlayers.length > 0">
-      <div class="ranking-container">
-        <div class="top-ranking">
-          <div class="rank" :class="getResultClass(index + 1)"
-            v-for="(player, index) in filteredPlayers.filter((_, i) => i <= 2)" :key="player.profile.id">
-            <span class="rank-number"><v-icon>mdi-crown</v-icon> {{ index + 1 }}位: </span>
-            <span class="rank-name">{{ player.profile.name }}</span>
-          </div>
-          <div class="rank other" v-for="(player, index) in filteredPlayers.filter((_, i) => i > 2 && i <= 7)" :key="player.profile.id">
-            <span class="rank-number">{{ index + 4 }}位: </span>
-            <span class="rank-name">{{ player.profile.name }}</span>
-          </div>
-        </div>
-        <div class="other-ranking">
-          <div class="rank" v-for="(player, index) in filteredPlayers.filter((_, i) => i > 7)" :key="player.profile.id">
-            <span class="rank-number">{{ index + 9 }}位: </span>
-            <span class="rank-name">{{ player.profile.name }}</span>
-          </div>
-        </div>
-      </div>
-    </template>
-    <template v-else>
-      <v-banner
-      class="my-4"
-      bg-color="green-lighten-5"
-      color="green-lighten-1"
-      icon="mdi-information"
-      lines="one"
+  <v-container class="pa-2">
+    <v-tabs
+      v-model="state.tab"
     >
-      <v-banner-text>
-        参加者を登録してください。
-      </v-banner-text>
-    </v-banner>
-    </template>
-  </div>
+      <v-tab :value=1 slider-color='green-darken-1' color='green-darken-1'>Group 1</v-tab>
+      <v-tab :value=2 slider-color='green-darken-1' color='green-darken-1'>Group 2</v-tab>
+      <v-tab :value=3 slider-color='green-darken-1' color='green-darken-1'>Group 3</v-tab>
+      <v-tab :value=4 slider-color='green-darken-1' color='green-darken-1'>Group 4</v-tab>
+    </v-tabs>
+    <div v-if="state.tab === 1">
+      <Ranking :groupId="1"/>
+    </div>
+    <div v-else-if="state.tab === 2">
+      <Ranking :groupId="2"/>
+    </div>
+    <div v-else-if="state.tab === 3">
+      <Ranking :groupId="3"/>
+    </div>
+    <div v-else-if="state.tab === 4">
+      <Ranking :groupId="4"/>
+    </div>
+  </v-container>
 </template>
-
 <style>
-.text-h3 {
-  font-family: "游ゴシック", "メイリオ", "MSゴシック" !important;
-}
-.headline {
-  padding: .1em .1em .1em .5em;
-  border-left: solid .3em #388E3C;
-}
-.ranking-header {
-  max-height: 60px;
-}
-.ranking-container {
-  /* 横並び */
-  display: flex;
-  flex-direction: row;
-  background: #FFF;
-  padding: 20px;
-}
-.top-ranking {
-  /* 縦並び */
-  display: flex;
-  flex-direction: column;
-  width: 75%;
-  gap: 20px;
-  padding: 10px;
-}
-/* フェードインアニメーション */
-@keyframes fadeIn {
-  from {
-    /* 透明 */
-    opacity: 0;
-    transform: translateY(-20px);
-  }
-
-  to {
-    /* 不透明 */
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-.top-ranking .rank {
-  /* 横並び */
-  display: flex;
-  flex-direction: row;
-  /* 両端揃え */
-  justify-content: space-between;
-  font-size: 28px;
-  font-weight: bold;
-  padding: 30px;
-  border-radius: 10px;
-  color: #222;
-  /* 最初は非表示 */
-  opacity: 0;
-  animation: fadeIn 1s ease-out forwards;
-  border-radius: 5px;
-  box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.3);
-}
-@media print {
-  .gold {
-    background-color: #ffd700 !important;
-    background-image: linear-gradient(90deg, #ffd700, #ffcc00) !important;
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-  }
-  .silver {
-    background-color: #c0c0c0 !important;
-    background-image: linear-gradient(90deg, #c0c0c0, #dcdcdc) !important;
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-  }
-  .bronze {
-    background-color: #cd7f32 !important;
-    background-image: linear-gradient(90deg, #cd7f32, #b87333) !important;
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-  }
-}
-.gold {
-  background: linear-gradient(90deg, #ffd700, #ffcc00);
-  animation-delay: 0.1s!important;
-}
-.silver {
-  background: linear-gradient(90deg, #c0c0c0, #dcdcdc);
-  animation-delay: 0.3s!important;
-}
-.bronze {
-  background: linear-gradient(90deg, #cd7f32, #b87333);
-  animation-delay: 0.5s!important;
-}
-.other {
-  animation-delay: 0.7s!important;
-}
-.other-ranking {
-  /* 縦並び */
-  display: flex;
-  flex-direction: column;
-  width: 40%;
-  gap: 5px;
-  padding: 10px;
-}
-.other-ranking .rank {
-  /* 横並び */
-  display: flex;
-  flex-direction: row;
-  /* 両端揃え */
-  justify-content: space-between;
-  font-size: 16px;
-  padding: 8px;
-  background: #FFF;
-  border-radius: 5px;
-  box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.3);
-}
 </style>
