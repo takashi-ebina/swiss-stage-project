@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { playerUtil } from "@/utils/playerUtil";
+import { util } from "@/utils/util";
 import { usePlayerStore } from "@/stores/playerStore";
 const props = defineProps<{
   groupId: number,
@@ -30,6 +31,10 @@ function getResultClass(ranking: number) {
       return "";
   }
 }
+
+function isEmpty(target: string) {
+  return util.isNullOrUndefined(target) || target.trim() === "";
+}
 </script>
 <template>
   <div class="ranking">
@@ -43,18 +48,46 @@ function getResultClass(ranking: number) {
       <div class="ranking-container">
         <div class="top-ranking">
           <div class="rank" :class="getResultClass(index + 1)"
-            v-for="(player, index) in filteredPlayers.filter((_, i) => i <= 2)" :key="player.profile.id">
-            <span class="rank-number"><v-icon>mdi-crown</v-icon> {{ index + 1 }}位: </span>
-            <span class="rank-name">{{ player.profile.name }}</span>
+            v-for="(player, index) in filteredPlayers.filter((_, i) => i <= 2)" :key="player.profile.id"
+          >
+            <div class="topic-text1">
+              <div class="topic-line1">
+                <v-icon size="x-large">mdi-crown</v-icon>
+              </div>
+              <div class="topic-line1">
+                <span class="top-rank-number">{{ index + 1 }} </span>
+              </div>
+            </div>
+            <div class="topic-text2">
+              <div class="topic-line2">
+                <span class="top-rank-organization">{{ isEmpty(player.profile.organization) ? "　": player.profile.organization }}</span>
+              </div>
+              <div class="topic-line2">
+                <span class="top-rank-name">{{ player.profile.name }}</span>
+              </div>
+            </div>
           </div>
-          <div class="rank other" v-for="(player, index) in filteredPlayers.filter((_, i) => i > 2 && i <= 7)" :key="player.profile.id">
-            <span class="rank-number">{{ index + 4 }}位: </span>
-            <span class="rank-name">{{ player.profile.name }}</span>
+          <div class="rank other" 
+            v-for="(player, index) in filteredPlayers.filter((_, i) => i > 2 && i <= 7)" :key="player.profile.id"
+          >
+            <div class="topic-text1">
+              <div class="topic-line1">
+                <span class="rank-number">{{ index + 4 }} </span>
+              </div>
+            </div>
+            <div class="topic-text2">
+              <div class="topic-line">
+                <span class="rank-organization">{{ isEmpty(player.profile.organization) ? "　": player.profile.organization }}</span>
+              </div>
+              <div class="topic-line">
+                <span class="rank-name">{{ player.profile.name }}</span>
+              </div>
+            </div>
           </div>
         </div>
         <div class="other-ranking">
           <div class="rank" v-for="(player, index) in filteredPlayers.filter((_, i) => i > 7)" :key="player.profile.id">
-            <span class="rank-number">{{ index + 9 }}位: </span>
+            <span class="rank-number">{{ index + 9 }} </span>
             <span class="rank-name">{{ player.profile.name }}</span>
           </div>
         </div>
@@ -93,14 +126,48 @@ function getResultClass(ranking: number) {
   flex-direction: row;
   background: #FFF;
   padding: 20px;
+  min-width: 1000px;
 }
 .top-ranking {
   /* 縦並び */
   display: flex;
   flex-direction: column;
-  width: 75%;
+  width: 65%;
   gap: 20px;
   padding: 10px;
+}
+.topic-line1 {
+  display: flex;
+  justify-content: center;
+}
+.topic-text1 {
+  height: 100px;
+  line-height: 100px;
+  width: 15%;
+}
+.top-rank-number {
+  color:#424242;
+  font-weight: bold;
+  margin-top: -25px;
+}
+.topic-text2 {
+  display: flex;
+  flex-direction: column;
+  /* 左寄せ */
+  align-items: flex-start;
+  text-align: left;
+  width: 85%;
+}
+.topic-line2 {
+  display: flex;
+  flex-wrap: wrap;
+  /* 左寄せ */
+  justify-content: flex-start;
+  width: 100%;
+}
+.top-rank-organization, .top-rank-name {
+  color:#424242;
+  font-weight: bold;
 }
 /* フェードインアニメーション */
 @keyframes fadeIn {
@@ -124,7 +191,7 @@ function getResultClass(ranking: number) {
   justify-content: space-between;
   font-size: 28px;
   font-weight: bold;
-  padding: 30px;
+  padding: 15px;
   border-radius: 10px;
   color: #222;
   /* 最初は非表示 */
@@ -172,9 +239,9 @@ function getResultClass(ranking: number) {
   /* 縦並び */
   display: flex;
   flex-direction: column;
-  width: 40%;
+  width: 35%;
   gap: 5px;
-  padding: 10px;
+  padding: 15px;
 }
 .other-ranking .rank {
   /* 横並び */

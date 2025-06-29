@@ -53,7 +53,19 @@ const registerPlayers = (): void => {
   while (profilesByGroupIdLength < constant.PLAYER_MAX_SIZE) {
     profilesStore.profiles.push(new Profile(props.groupId, ++profilesByGroupIdLength));
   }
-  playerStore.players = profilesStore.profiles.map(p => Player.fromProfile(props.groupId, p.clone()));
+  playerStore.players = profilesStore.profiles
+    .map((profile) => {
+      if (profile.group_id === props.groupId) {
+        return Player.fromProfile(profile.group_id, profile.clone());
+      } else {
+        const tmpPlayer = playerStore.players.find(player => player.profile.group_id === profile.group_id && player.profile.id === profile.id);
+        if (tmpPlayer) {
+          return Player.fromProfileAndMatchDto(profile.group_id, profile.clone(), tmpPlayer.toMatchDtoList());
+        } else {
+          return Player.fromProfile(profile.group_id, profile.clone());
+        }
+      }
+    });
   $toast.success("登録に成功しました!" + (existsDummyPlayer ? "<br><br>参加者が奇数のため、ダミーユーザーを追加しています" : ""), { position: "top" });
   
 };
