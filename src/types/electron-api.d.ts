@@ -1,4 +1,4 @@
-import type { PlayerDto } from '../src/types/playerDto';
+import type { ProfileDto } from '../src/types/profileDto';
 import type { MatchDto } from '../src/types/matchDto';
 import type { TitleInfoDto } from './titleInfoDto';
 export {}
@@ -7,10 +7,10 @@ declare global {
   interface Window {
     electronAPI: {
       initDb: () => Promise<void>
-      findAllProfiles: () => Promise<PlayerDto[]>
+      findAllProfiles: () => Promise<ProfileDto[]>
       findAllMatches: () => Promise<MatchDto[]>
       findOneTitleInfo: () => Promise<TitleInfoDto[]>
-      save: (playerDto: PlayerDto, matchDtoList: MatchDto[]) => Promise<void>
+      save: (groupId: number, profileDto: ProfileDto, matchDtoList: MatchDto[]) => Promise<void>
       saveTitleInfo: (titleInfoDto: TitleInfoDto) => Promise<void>
       delete: () => Promise<void>
     }

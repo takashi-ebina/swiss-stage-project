@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { reactive } from 'vue'
-import List from '@/components/List.vue'
+import Match from '@/components/Match.vue'
 const state = reactive({
   tab: 1,
 });
@@ -16,16 +16,16 @@ const state = reactive({
       <v-tab :value=4 slider-color='green-darken-1' color='green-darken-1'>Group 4</v-tab>
     </v-tabs>
     <div v-if="state.tab === 1">
-      <List :groupId="1"/>
+      <Match :groupId="1"/>
     </div>
     <div v-else-if="state.tab === 2">
-      <List :groupId="2"/>
+      <Match :groupId="2"/>
     </div>
     <div v-else-if="state.tab === 3">
-      <List :groupId="3"/>
+      <Match :groupId="3"/>
     </div>
     <div v-else-if="state.tab === 4">
-      <List :groupId="4"/>
+      <Match :groupId="4"/>
     </div>
   </v-container>
 </template>

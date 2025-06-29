@@ -8,7 +8,7 @@ const checkLength = (maxLength: number) => {
  * 登録するプレイヤーの入力値をチェックする
  * @returns {boolean} 入力値に問題ない場合はtrue、それ以外の場合はfalseを返却する
  */
-const validateprofiles = (profiles: Profile[]): boolean => {
+const validateProfiles = (profiles: Profile[]): boolean => {
     for (const profile of profiles) {
       const hasName = profile.name.trim() !== "";
       const hasRank = profile.rank.name.trim() !== "";
@@ -24,6 +24,6 @@ export const validatorUtil = {
     checkOrganizationLength: checkLength(30),
     checkNameLength: checkLength(20),
     checkTitleLength: checkLength(30),
-    validateprofiles: validateprofiles
+    validateProfiles: validateProfiles
 };
 

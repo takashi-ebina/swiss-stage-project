@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '../views/HomeView.vue'
+import MatchView from '../views/MatchView.vue'
 import ListView from '../views/ListView.vue'
 import RankingView from '../views/RankingView.vue'
 
@@ -8,8 +8,8 @@ const router = createRouter({
   routes: [
     {
       path: '/',
-      name: 'home',
-      component: HomeView,
+      name: 'match',
+      component: MatchView,
     },
     {
       path: '/list',
