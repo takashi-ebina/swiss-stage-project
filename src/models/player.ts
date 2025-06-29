@@ -78,6 +78,10 @@ export class Player {
     return new Player(group_id, profile);
   }
 
+  static fromProfileAndMatchDto(group_id: number, profile: Profile, matchDtoList: MatchDto[]) {
+    return new Player(group_id, profile, matchDtoList);
+  }
+  
   static fromGroupId(group_id: number): Player {
     return new Player(group_id);
   }

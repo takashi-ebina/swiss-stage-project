@@ -234,7 +234,7 @@ const onResultChange = (match: Match, currentRound: number, ownPlayerIndex: numb
   border-spacing: 0;
   /* テーブルの列幅は固定 */
   table-layout: fixed;
-  min-width: 700px;
+  min-width: 1000px;
   text-align: center;
   margin: auto;
 }
@@ -264,9 +264,6 @@ const onResultChange = (match: Match, currentRound: number, ownPlayerIndex: numb
 }
 .home-table-body-name {
   width: 150px;
-}
-.home-table-body-match-no {
-  width: 60px;
 }
 .home-table-body-matches-opponent {
   width: 45px;

@@ -12,8 +12,8 @@ const __dirname = path.dirname(__filename);
 
 function createWindow() {
   const win = new BrowserWindow({
-    width: 1200,
-    height: 600,
+    width: 1280,
+    height: 1080,
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
@@ -21,7 +21,7 @@ function createWindow() {
     },
   })
 
-  win.setMaximumSize(1280, 1200);
+  win.setMaximumSize(1280, 1080);
 
   if (process.env.NODE_ENV === "development") {
     win.loadURL('http://localhost:3000');
