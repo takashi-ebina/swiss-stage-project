@@ -2,22 +2,22 @@
 import { RouterView } from 'vue-router'
 import { onMounted, reactive } from 'vue';
 import Header from './components/Header.vue'
-import { util } from "@/utils/util";
 import { playerUtil } from "@/utils/playerUtil";
 import type { ProfileDto } from "@/types/profileDto";
 import type { MatchDto } from "@/types/matchDto";
 import { useProfileStore } from "@/stores/profileStore";
 import { usePlayerStore } from "@/stores/playerStore";
+import { useTitleInfoStore } from "@/stores/titleInfoStore";
 import { Profile } from "@/models/profile";
 import { Player } from "@/models/player";
+import { TitleInfo } from "@/models/titleInfo";
 import type { TitleInfoDto } from './types/titleInfoDto';
 import { constant } from './constants/constant';
 
-const $ProfileStore = useProfileStore();
-const $PlayerStore = usePlayerStore();
+const profileStore = useProfileStore();
+const playerStore = usePlayerStore();
+const titleInfoStore = useTitleInfoStore();
 const state = reactive({
-  defaultTitle: "",
-  defaultLogoName: "",
   isReady: false,
   rail: true,
 });
@@ -32,81 +32,66 @@ onMounted(async () => {
   console.log('titleInfoDtoList:',titleInfoDtoList);
 
   // DBに保存されているデータは初期表示時に画面に表示させる
-  // TODO ??演算子で代用できる？？
-  if (!util.isNullOrUndefined(profileDtoList) && profileDtoList.length >= 1) {
+  if (profileDtoList?.length >= 1) {
     // 参加者リストのデータが保存されている場合
     const savedProfiles: Profile[] = profileDtoList
       .map((profileDto) => Profile.fromDto(profileDto))
       .filter(profile => profile.name.trim() !== "" || profile.rank.name.trim() !== "");
 
-    $ProfileStore.profiles = savedProfiles;
-    if (!util.isNullOrUndefined(matchDtoList) && matchDtoList.length >= 1) {
+    profileStore.profiles = savedProfiles;
+    if (matchDtoList?.length >= 1) {
       // 対戦結果のデータが保存されている場合、対戦結果のデータを参加者ごとにグルーピングする
       const matchDtoListGroupedById: Record<string, MatchDto[]> = {};
         for (const match of matchDtoList) {
-          if (!matchDtoListGroupedById[getMatchKey(match)]) {
-            matchDtoListGroupedById[getMatchKey(match)] = [];
+          if (!matchDtoListGroupedById[playerUtil.getMatchKey(match)]) {
+            matchDtoListGroupedById[playerUtil.getMatchKey(match)] = [];
           }
-          matchDtoListGroupedById[getMatchKey(match)].push(match);
+          matchDtoListGroupedById[playerUtil.getMatchKey(match)].push(match);
         }
         const savedPlayers: Player[] = profileDtoList
-          .map((profileDto) => Player.fromDtos(profileDto, matchDtoListGroupedById[getProfileKey(profileDto)]))
+          .map((profileDto) => Player.fromDtos(profileDto, matchDtoListGroupedById[playerUtil.getProfileKey(profileDto)]))
           .filter(player => player.profile.name.trim() !== "" || player.profile.rank.name.trim() !== "");
-        $PlayerStore.players = savedPlayers;
+        playerStore.players = savedPlayers;
     } else {
       // 対戦結果のデータが保存されていない場合、参加者のデータだけ設定する
       savedProfiles.forEach((profile, index) => {
-        $PlayerStore.players[index].profile = profile;
+        playerStore.players[index].profile = profile;
       });
     }
 
     for (let groupIdx:number = 1; groupIdx <= constant.GROUP_SIZE; groupIdx++) {
-      const existing = $ProfileStore.profiles.filter(p => p.group_id === groupIdx);
+      const existing = profileStore.profiles.filter(p => p.group_id === groupIdx);
       const missingCount = constant.PLAYER_MAX_SIZE - existing.length;
       for (let i = 1; i <= missingCount; i++) {
         const tmpProfile = new Profile(groupIdx, existing.length + i);
-        $ProfileStore.profiles.push(tmpProfile);
-        $PlayerStore.players.push(Player.fromGroupId(groupIdx));
+        profileStore.profiles.push(tmpProfile);
+        playerStore.players.push(Player.fromGroupId(groupIdx));
       }
     }
-    $PlayerStore.players.forEach((player) => {
+    playerStore.players.forEach((player) => {
       player.matches.forEach((match, matchIndex) => {
-        playerUtil.updatePlayerPoints($PlayerStore.players, player, match, matchIndex);
+        playerUtil.updatePlayerPoints(playerStore.players, player, match, matchIndex);
       });
     });
     for (let groupIdx:number = 1; groupIdx <= constant.GROUP_SIZE; groupIdx++) {
-      playerUtil.updatePlayerMatchScore($PlayerStore.players, groupIdx);
+      playerUtil.updatePlayerMatchScore(playerStore.players, groupIdx);
     }
   }
 
-  if (!util.isNullOrUndefined(titleInfoDtoList) && titleInfoDtoList.length >= 1) {
-    state.defaultTitle = titleInfoDtoList[0].title;
-    state.defaultLogoName = titleInfoDtoList[0].logo_name;
+  if (titleInfoDtoList?.length >= 1) {
+    titleInfoStore.titleInfo = new TitleInfo(titleInfoDtoList[0].logo_name, titleInfoDtoList[0].title);
   } else {
-    state.defaultTitle = "swiss-stage-project";
-    state.defaultLogoName = "igo"; 
+    titleInfoStore.titleInfo = new TitleInfo("igo", "swiss-stage-project");
   }
+  
   state.isReady = true;
 });
-
-// TODO ロジックが外に漏れ出ているので、本当はこんなところに実装したくない、、苦肉の策、、、
-const getMatchKey = (match: MatchDto): string =>{
-  return match.group_id + "@" + match.id;
-}
-const getProfileKey = (profile: ProfileDto): string =>{
-  return profile.group_id + "@" + profile.id;
-}
-
 </script>
 
 <template>
   <v-app>
     <v-app-bar flat>
-      <Header
-        v-if="state.isReady"
-        :defaultTitle="state.defaultTitle"
-        :defaultLogoName="state.defaultLogoName"
-      />
+      <Header v-if="state.isReady"/>
     </v-app-bar>
     <v-navigation-drawer
       :rail="state.rail"
@@ -126,6 +111,7 @@ const getProfileKey = (profile: ProfileDto): string =>{
         <v-list-item prepend-icon="mdi-sword-cross" title="対戦表"  to="/" exact></v-list-item>
         <v-list-item prepend-icon="mdi-account-group" title="参加者リスト"  to="/list" exact></v-list-item>
         <v-list-item prepend-icon="mdi-trophy" title="ランキング"  to="/ranking" exact></v-list-item>
+        <v-list-item prepend-icon="mdi-cog" title="設定"  to="/conf" exact></v-list-item>
       </v-list>
     </v-navigation-drawer>
     <v-main>

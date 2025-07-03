@@ -1,5 +1,7 @@
 import { Player } from "@/models/player";
 import { Match } from "@/models/match";
+import type { ProfileDto } from "@/types/profileDto";
+import type { MatchDto } from "@/types/matchDto";
 
 /**
  * 対戦相手の結果の更新とプレイヤー、対戦相手の勝ち点の更新を行う
@@ -78,10 +80,15 @@ const getPlayersByGroupId = (players: Player[], groupId: Number): Player[] => {
   return players.filter(players => players.profile.group_id === groupId);
 };
 
+const getMatchKey = (match: MatchDto): string => `${match.group_id}@${match.id}`;
+const getProfileKey = (profile: ProfileDto): string => `${profile.group_id}@${profile.id}`;
+
 export const playerUtil = {
     updatePlayerPoints,
     updatePlayerMatchScore,
     findOpponentPlayer,
     getPlayersByGroupId,
+    getMatchKey,
+    getProfileKey,
 }
 
