@@ -2,7 +2,7 @@
 
 主に囲碁・将棋を対象とした、スイス方式トーナメントの対戦組み合わせを作成するアプリ（swiss-stage-project）です
 
-最大32名によるトーナメントまで対応できます
+最大32名 × 4グループによるトーナメントまで対応できます
 
 ## インストーラー
 
@@ -15,17 +15,21 @@
 ### アイコン
 
 <img src="https://github.com/user-attachments/assets/5d04d600-91a6-468d-adf2-e4f0427b9cfe" width="20%">
-  
+
 ## 画面
 
 ### 対戦表
-![対戦表](https://github.com/user-attachments/assets/621915b0-712f-42ee-9310-53b6b554ae21)
+![対戦表](https://github.com/user-attachments/assets/048cb3a9-daf0-4d70-90b3-a10243982301)
 
 ### 参加者リスト
-![参加者リスト](https://github.com/user-attachments/assets/a3fe4c0e-0094-4ec4-b926-0de9d64f5658)
+![参加者リスト](https://github.com/user-attachments/assets/53e8840a-64b5-4b93-a3b0-b63cb2291187)
 
 ### ランキング
-![ランキング](https://github.com/user-attachments/assets/a7da12b9-ba75-4b6c-b230-1de044f6da34)
+![ランキング](https://github.com/user-attachments/assets/8183229a-02bb-4235-b686-163f54d94a1e)
+
+### 設定
+![設定](https://github.com/user-attachments/assets/848e22fc-05e9-4fb7-84af-2b877cf699c6)
+
 
 ## 使い方
 
@@ -57,9 +61,15 @@
 
 - ランキングから、現在の順位を確認することができます
 
-### ４．その他
+### ４．設定
 
-- 画面左上のアイコンをクリックすることで、表示されるアイコンを変更することができます
+- 設定から、ヘッダーのロゴとタイトル名の編集ができます
+
+### ５．ヘッダー
+
+- 画面右上の「リセット」から画面の表示内容をすべて初期化することができます
+
+- 画面右上の「保存」から画面の表示内容をすべて保存することができます
 
 - 画面右上の「印刷」から印刷ができます
   - 対戦結果、参加メンバー、ランキングを紙に出力することや、PDF形式で電子データとして保存できます
