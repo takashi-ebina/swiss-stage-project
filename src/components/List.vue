@@ -192,8 +192,9 @@ const getProfilesByGroupId = (profiles: Profile[], groupId: number): Profile[] =
   background-color: #43A047;
 }
 .required::after {
-  content: " *";
+  content: " *必須";
   color: #ff4b00;
-  vertical-align: middle;
+  vertical-align: top;
+  font-size: x-small;
 }
 </style>

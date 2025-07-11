@@ -66,6 +66,9 @@ function isEmpty(target: string) {
                 <span class="top-rank-name">{{ player.profile.name }}</span>
               </div>
             </div>
+            <div class="topic-text3">
+              {{ player.sodos + "pt" }}
+            </div>
           </div>
           <div class="rank other" 
             v-for="(player, index) in filteredPlayers.filter((_, i) => i > 2 && i <= 7)" :key="player.profile.id"
@@ -83,12 +86,29 @@ function isEmpty(target: string) {
                 <span class="rank-name">{{ player.profile.name }}</span>
               </div>
             </div>
+            <div class="topic-text3">
+              {{ player.sodos + "pt" }}
+            </div>
           </div>
         </div>
         <div class="other-ranking">
           <div class="rank" v-for="(player, index) in filteredPlayers.filter((_, i) => i > 7)" :key="player.profile.id">
-            <span class="rank-number">{{ index + 9 }} </span>
-            <span class="rank-name">{{ player.profile.name }}</span>
+            <div class="other-topic-text1">
+              <div class="other-topic-line1">
+                <span class="rank-number">{{ index + 9 }} </span>
+              </div>
+            </div>
+            <div class="other-topic-text2">
+              <div class="other-topic-line2">
+                <span class="rank-organization">{{ isEmpty(player.profile.organization) ? "　": player.profile.organization }}</span>
+              </div>
+              <div class="other-topic-line2">
+                <span class="rank-name">{{ player.profile.name }}</span>
+              </div>
+            </div>
+            <div class="other-topic-text3">
+              {{ player.sodos + "pt" }}
+            </div>
           </div>
         </div>
       </div>
@@ -156,7 +176,7 @@ function isEmpty(target: string) {
   /* 左寄せ */
   align-items: flex-start;
   text-align: left;
-  width: 85%;
+  width: 75%;
 }
 .topic-line2 {
   display: flex;
@@ -164,6 +184,11 @@ function isEmpty(target: string) {
   /* 左寄せ */
   justify-content: flex-start;
   width: 100%;
+}
+.topic-text3 {
+  height: 100px;
+  line-height: 100px;
+  width: 10%;
 }
 .top-rank-organization, .top-rank-name {
   color:#424242;
@@ -254,5 +279,34 @@ function isEmpty(target: string) {
   background: #FFF;
   border-radius: 5px;
   box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.3);
+}
+.other-topic-line1 {
+  display: flex;
+  justify-content: center;
+}
+.other-topic-text1 {
+  height: 50px;
+  line-height: 50px;
+  width: 15%;
+}
+.other-topic-text2 {
+  display: flex;
+  flex-direction: column;
+  /* 左寄せ */
+  align-items: flex-start;
+  text-align: left;
+  width: 75%;
+}
+.other-topic-line2 {
+  display: flex;
+  flex-wrap: wrap;
+  /* 左寄せ */
+  justify-content: flex-start;
+  width: 100%;
+}
+.other-topic-text3 {
+  height: 50px;
+  line-height: 50px;
+  width: 10%;
 }
 </style>
