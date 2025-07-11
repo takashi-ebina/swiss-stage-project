@@ -6,7 +6,6 @@ import { playerUtil } from "@/utils/playerUtil";
 import { usePlayerStore } from "@/stores/playerStore";
 import { resultOptions } from "@/constants/resultOptions";
 import { roundOptions } from "@/constants/roundOptions";
-import { constant } from "@/constants/constant";
 import { Player } from "@/models/player";
 import { Result } from "@/models/result";
 import { Match } from "@/models/match";
@@ -44,46 +43,57 @@ const getResultClass = (result: Result): string => {
  * セレクトボックスで選択した回戦に対して、対戦相手をマッチさせる
  */
 const setOpponent = (): void => {
-  for (const player of playerUtil.getPlayersByGroupId(playerStore.players, props.groupId)) {
-    if (player.profile.name.trim() === "") break;
-    if (hasOpponentInRound(player, selectedRound.value.value)) continue;
-    // いったん仮で-99を設定する
-    player.matches[selectedRound.value.value - 1].opponentId = constant.OPPONENT_PLAYER_NO_MATCH;
-    // 毎回、Noの昇順で対戦相手を探すと、組み合わせに偏りが出そうなので、
-    // 偶数の回戦の場合はNoの降順で対戦相手を探すようにしているが意味あるかはわからない・・
-    const tmpPlayers = selectedRound.value.value % 2 !== 0 ? 
-      playerUtil.getPlayersByGroupId(playerStore.players, props.groupId) : [...playerUtil.getPlayersByGroupId(playerStore.players, props.groupId)].reverse();
-    for (const opponentPlayer of tmpPlayers) {
-      if (player.profile.id === opponentPlayer.profile.id
-        || opponentPlayer.profile.name.trim() === ""
-        || hasOpponentInRound(opponentPlayer, selectedRound.value.value)
-        || hasAlreadyMatched(player, opponentPlayer, selectedRound.value.value)) {
-        continue;
-      }
-      const pointsDifference = Math.abs(player.points -  opponentPlayer.points);
-      if (pointsDifference >= 0 && pointsDifference <= 0.5) {
-        // お互いの勝ち点の差が0.5点以内の場合、対戦相手としてマッチさせる
-        player.matches[selectedRound.value.value - 1].opponentId = opponentPlayer.profile.id.toString();
-        opponentPlayer.matches[selectedRound.value.value - 1].opponentId = player.profile.id.toString();
-        break;
-      }
-    }
-  }
-  if (existsNoMatchPlayer()) {
-    $toast.warning("対戦相手を設定しました! <br><br>相手がマッチしなかった参加者がいるので手動で設定してください", { position: "top" });
-  } else {
+  const round = selectedRound.value.value;
+  const players = playerUtil.getPlayersByGroupId(playerStore.players, props.groupId)
+    .filter(p => p.profile.name.trim() !== "")
+    .sort((a, b) => b.points - a.points);
+  const success = pairPlayersBacktrack(players, round);
+  players.sort((a, b) => a.profile.id - b.profile.id);
+  if (success) {
     $toast.success("対戦相手を設定しました!", { position: "top" });
+  } else {
+    $toast.warning("対戦相手の自動設定に失敗しました。手動で修正してください。", { position: "top" });
   }
-}
+};
 /**
- * 対戦相手がマッチしないプレイヤーがいるかどうか
- * @returns {boolean} 対戦相手がマッチしない参加者がいる場合はtrue、それ以外の場合はfalseを返却する
+ * バックトラック法で対戦相手を探索する
+ * @param players 対戦候補のプレイヤーリスト
+ * @param round 選択した回戦
  */
-const existsNoMatchPlayer = (): boolean => {
-  return playerUtil.getPlayersByGroupId(playerStore.players, props.groupId)
-    .map((player) => player.matches[selectedRound.value.value - 1].opponentId)
-    .includes(constant.OPPONENT_PLAYER_NO_MATCH);
-}
+const pairPlayersBacktrack = (players: Player[], round: number): boolean => {
+  // 未マッチのプレイヤーを取得
+  const unpaired = players.find(p => !hasOpponentInRound(p, round));
+  if (!unpaired) {
+    // プレイヤー全員が対戦相手のマッチ完了
+    return true;
+  }
+  for (const candidate of players) {
+    if (candidate.profile.id === unpaired.profile.id
+      || hasOpponentInRound(candidate, round)
+      || hasAlreadyMatched(unpaired, candidate, round)) {
+        continue;
+    }
+    // プレイヤー自身と、対戦相手の候補で勝ち点を比較する
+    const pointDiff = Math.abs(unpaired.points - candidate.points);
+    if (pointDiff > 0.5) {
+      // 勝ち点の差が0.5を超過したプレイヤー同士の場合はマッチせずに次の対戦相手の候補を探す
+      continue;
+    }
+    // 勝ち点の差が0.5以下のプレイヤー同士の場合は仮マッチ
+    unpaired.matches[round - 1].opponentId = candidate.profile.id.toString();
+    candidate.matches[round - 1].opponentId = unpaired.profile.id.toString();
+    // 再帰処理にて、次のペアを探す
+    // この後の処理でマッチできないケース(false)が発生した場合、このペアは適切でないということがわかる
+    if (pairPlayersBacktrack(players, round)) {
+      return true;
+    }
+    console.log("[debug] バックトラック発生！！ player:" + candidate.profile.id.toString() + ", candidate:" + unpaired.profile.id.toString());
+    // 仮マッチしたペアを削除して、次の対戦相手の候補を探す（バックトラック）
+    unpaired.matches[round - 1].opponentId = "";
+    candidate.matches[round - 1].opponentId = "";
+  }
+  return false;
+};
 /**
  * 選択した回戦において、既に対戦相手が設定されているか
  * @param {Player} player プレイヤー
@@ -101,7 +111,7 @@ const hasOpponentInRound = (player: Player, selectedRound: number): boolean => {
  * @returns {boolean} 既に対戦したことがある場合はtrue、それ以外の場合はfalseを返却する
  */
 const hasAlreadyMatched = (player: Player, opponentPlayer: Player, currentRound: number): boolean => {
-  for (let i = currentRound; i >= 1; i--) {
+  for (let i = currentRound - 1; i >= 1; i--) {
     if (parseInt(player.matches[i - 1].opponentId) === opponentPlayer.profile.id) {
       return true;
     }
