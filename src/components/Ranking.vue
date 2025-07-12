@@ -67,7 +67,7 @@ function isEmpty(target: string) {
               </div>
             </div>
             <div class="topic-text3">
-              {{ player.sodos + "pt" }}
+              {{ player.points + "pt" }}
             </div>
           </div>
           <div class="rank other" 
@@ -87,7 +87,7 @@ function isEmpty(target: string) {
               </div>
             </div>
             <div class="topic-text3">
-              {{ player.sodos + "pt" }}
+              {{ player.points + "pt" }}
             </div>
           </div>
         </div>
@@ -107,7 +107,7 @@ function isEmpty(target: string) {
               </div>
             </div>
             <div class="other-topic-text3">
-              {{ player.sodos + "pt" }}
+              {{ player.points + "pt" }}
             </div>
           </div>
         </div>

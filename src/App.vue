@@ -109,7 +109,7 @@ onMounted(async () => {
       <v-divider></v-divider>
       <v-list density="compact" nav>
         <v-list-item prepend-icon="mdi-sword-cross" title="対戦表"  to="/" exact></v-list-item>
-        <v-list-item prepend-icon="mdi-account-group" title="参加者リスト"  to="/list" exact></v-list-item>
+        <v-list-item prepend-icon="mdi-account-group" title="参加者一覧"  to="/list" exact></v-list-item>
         <v-list-item prepend-icon="mdi-trophy" title="ランキング"  to="/ranking" exact></v-list-item>
         <v-list-item prepend-icon="mdi-cog" title="設定"  to="/conf" exact></v-list-item>
       </v-list>

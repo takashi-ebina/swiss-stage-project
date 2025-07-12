@@ -79,7 +79,7 @@ const getProfilesByGroupId = (profiles: Profile[], groupId: number): Profile[] =
   <div class="list">
     <v-row class="list-header ma-1">
       <v-col cols="3" class="justify-start">
-        <h2 class="headline"><b>参加者リスト</b></h2>
+        <h2 class="headline"><b>参加者一覧</b></h2>
       </v-col>
       <v-spacer></v-spacer>
       <v-col cols="2" class="justify-end">
