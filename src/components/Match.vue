@@ -52,7 +52,7 @@ const setOpponent = (): void => {
   if (success) {
     $toast.success("対戦相手を設定しました!", { position: "top" });
   } else {
-    $toast.warning("対戦相手の自動設定に失敗しました。手動で修正してください。", { position: "top" });
+    $toast.warning("対戦相手の自動設定に失敗しました。手動で設定してください。", { position: "top" });
   }
 };
 /**
