@@ -64,12 +64,6 @@ This document is a guide to help make your contribution easier and more effectiv
 
 ### documentation
 
-- Move to the directory
-
-    ```bash
-    cd docs
-    ```
-
 - run docs:
 
     ```bash
