@@ -31,17 +31,14 @@ const registerPlayers = (): void => {
   // IDを振り直し、対象のグループの不要なプレイヤーを削除
   profilesStore.profiles = profilesStore.profiles
     .sort((a, b) => a.rank.value - b.rank.value)
-    .map((profile) => {
-      if (profile.group_id === props.groupId) {
-        return profile.updateProfileId(idIndex++);
-      } else {
-        return profile;
-      }
-    })
+    .map((profile) => 
+      profile.group_id === props.groupId
+        ? profile.updateProfileId(idIndex++)
+        : profile
+    )
     .filter(profile => 
       profile.group_id !== props.groupId 
-        || (profile.group_id === props.groupId 
-        && profile.name.trim() !== "" || profile.rank.name.trim() !== "")
+        || (profile.name.trim() !== "" || profile.rank.name.trim() !== "")
       );
   // 奇数ならダミープレイヤーを追加
   let profilesByGroupIdLength = getProfilesByGroupId(profilesStore.profiles, props.groupId).length;
@@ -57,14 +54,11 @@ const registerPlayers = (): void => {
     .map((profile) => {
       if (profile.group_id === props.groupId) {
         return Player.fromProfile(profile.group_id, profile.clone());
-      } else {
-        const tmpPlayer = playerStore.players.find(player => player.profile.group_id === profile.group_id && player.profile.id === profile.id);
-        if (tmpPlayer) {
-          return Player.fromProfileAndMatchDto(profile.group_id, profile.clone(), tmpPlayer.toMatchDtoList());
-        } else {
-          return Player.fromProfile(profile.group_id, profile.clone());
-        }
       }
+      const existing = playerStore.players.find(p =>
+        p.profile.group_id === profile.group_id && p.profile.id === profile.id
+      );
+      return existing ?? Player.fromProfile(profile.group_id, profile.clone())
     });
   $toast.success("登録に成功しました!" + (existsDummyPlayer ? "<br><br>参加者が奇数のため、ダミーユーザーを追加しています" : ""), { position: "top" });
   

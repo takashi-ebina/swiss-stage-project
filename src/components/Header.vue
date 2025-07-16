@@ -4,6 +4,7 @@ import { useTitleInfoStore } from "@/stores/titleInfoStore";
 import { useProfileStore } from "@/stores/profileStore";
 import { usePlayerStore } from "@/stores/playerStore";
 import { useToast } from 'vue-toast-notification';
+import { excelUtil } from "@/utils/excelUtil";
 import { Player } from '@/models/player';
 import { Profile } from '@/models/profile';
 import { constant } from '@/constants/constant';
@@ -50,6 +51,9 @@ const reset = (): void => {
   titleInfoStore.titleInfo.logoName = "igo";
   titleInfoStore.titleInfo.title = "swiss-stage-project";
 }
+const exportExcel = (): void => {
+  excelUtil.exportExcel(playerStore.players, titleInfoStore.titleInfo.title);
+}
 </script>
 
 <template>
@@ -59,6 +63,11 @@ const reset = (): void => {
       <h1 class="title">
         {{ titleInfoStore.titleInfo.title }}
       </h1>
+      <v-tooltip location="top" text="Excel出力">
+        <template v-slot:activator="{ props }">
+          <v-btn v-bind="props" icon="mdi-file-excel" class="reset-button text-white text-body-1" @click="exportExcel();"></v-btn>
+        </template>
+      </v-tooltip>
       <v-tooltip location="top" text="リセット">
         <template v-slot:activator="{ props }">
           <v-btn v-bind="props" icon="mdi-reload" class="reset-button text-white text-body-1" @click="reset();"></v-btn>

@@ -52,7 +52,7 @@ function isEmpty(target: string) {
           >
             <div class="topic-text1">
               <div class="topic-line1">
-                <v-icon size="x-large">mdi-crown</v-icon>
+                <v-icon size="x-large" color="yellow-darken-1">mdi-crown</v-icon>
               </div>
               <div class="topic-line1">
                 <span class="top-rank-number">{{ index + 1 }} </span>
@@ -67,7 +67,7 @@ function isEmpty(target: string) {
               </div>
             </div>
             <div class="topic-text3">
-              {{ player.points + "pt" }}
+              <span class="top-rank-point">{{ player.points + "pt" }}</span>
             </div>
           </div>
           <div class="rank other" 
@@ -190,7 +190,7 @@ function isEmpty(target: string) {
   line-height: 100px;
   width: 10%;
 }
-.top-rank-organization, .top-rank-name {
+.top-rank-organization, .top-rank-name, .top-rank-point {
   color:#424242;
   font-weight: bold;
 }
@@ -228,7 +228,7 @@ function isEmpty(target: string) {
 @media print {
   .gold {
     background-color: #ffd700 !important;
-    background-image: linear-gradient(90deg, #ffd700, #ffcc00) !important;
+    background-image: linear-gradient(90deg, #FFF176, #FFF59D) !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
@@ -240,13 +240,13 @@ function isEmpty(target: string) {
   }
   .bronze {
     background-color: #cd7f32 !important;
-    background-image: linear-gradient(90deg, #cd7f32, #b87333) !important;
+    background-image: linear-gradient(90deg, #cd8339, #c48b57) !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
 }
 .gold {
-  background: linear-gradient(90deg, #ffd700, #ffcc00);
+  background: linear-gradient(90deg, #FFF176, #FFF59D);
   animation-delay: 0.1s!important;
 }
 .silver {
@@ -254,7 +254,7 @@ function isEmpty(target: string) {
   animation-delay: 0.3s!important;
 }
 .bronze {
-  background: linear-gradient(90deg, #cd7f32, #b87333);
+  background: linear-gradient(90deg, #cd8339, #c48b57);
   animation-delay: 0.5s!important;
 }
 .other {
