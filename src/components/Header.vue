@@ -63,26 +63,18 @@ const exportExcel = (): void => {
       <h1 class="title">
         {{ titleInfoStore.titleInfo.title }}
       </h1>
-      <v-tooltip location="top" text="Excel出力">
-        <template v-slot:activator="{ props }">
-          <v-btn v-bind="props" icon="mdi-file-excel" class="reset-button text-white text-body-1" @click="exportExcel();"></v-btn>
-        </template>
-      </v-tooltip>
-      <v-tooltip location="top" text="リセット">
-        <template v-slot:activator="{ props }">
-          <v-btn v-bind="props" icon="mdi-reload" class="reset-button text-white text-body-1" @click="reset();"></v-btn>
-        </template>
-      </v-tooltip>
-      <v-tooltip location="top" text="保存">
-        <template v-slot:activator="{ props }">
-          <v-btn v-bind="props" icon="mdi-content-save" class="save-button text-white text-body-1" @click="save();"></v-btn>
-        </template>
-      </v-tooltip>
-      <v-tooltip location="top" text="印刷">
-        <template v-slot:activator="{ props }">
-          <v-btn v-bind="props" icon="mdi-printer-outline" class="print-button text-white text-body-1" @click="print();"></v-btn>
-        </template>
-      </v-tooltip>
+      <v-btn prepend-icon="mdi-content-save" class="save-button bg-green-lighten-2 text-white text-button ma-1" @click="save();">
+        保存
+      </v-btn>
+      <v-btn prepend-icon="mdi-file-excel" class="excel-button bg-green-lighten-2 text-white text-button ma-1" @click="exportExcel();">
+        Excel出力
+      </v-btn>
+      <v-btn prepend-icon="mdi-printer-outline" class="print-button bg-green-lighten-2 text-white text-button ma-1" @click="print();">
+        印刷
+      </v-btn>
+      <v-btn prepend-icon="mdi-reload" class="reset-button bg-green-lighten-2 text-white text-button ma-1" @click="reset();">
+        リセット
+      </v-btn>
     </header>
     <v-progress-linear
       v-if="state.loading"
@@ -123,8 +115,11 @@ header {
   width: 60px;
   height: 60px;
 }
+.excel-button {
+  text-transform: none!important;
+}
 @media print {
-  .print-button, .save-button, .reset-button,
+  .print-button, .save-button, .reset-button, .excel-button,
   .title-edit-icon {
     display: none;
   }

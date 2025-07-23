@@ -80,6 +80,10 @@ const getPlayersByGroupId = (players: Player[], groupId: Number): Player[] => {
   return players.filter(players => players.profile.group_id === groupId);
 };
 
+const getNotEmptyPlayers = (players: Player[]): Player[] => {
+  return players.filter(players => players.profile.name !== "");
+};
+
 const getMatchKey = (match: MatchDto): string => `${match.group_id}@${match.id}`;
 const getProfileKey = (profile: ProfileDto): string => `${profile.group_id}@${profile.id}`;
 
@@ -88,6 +92,7 @@ export const playerUtil = {
     updatePlayerMatchScore,
     findOpponentPlayer,
     getPlayersByGroupId,
+    getNotEmptyPlayers,
     getMatchKey,
     getProfileKey,
 }
