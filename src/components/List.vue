@@ -67,7 +67,72 @@ const registerPlayers = (): void => {
 const getProfilesByGroupId = (profiles: Profile[], groupId: number): Profile[] => {
   return profiles.filter(profile => profile.group_id === groupId);
 };
+/**
+ * csvのダウンロードを実施する
+ */
+const downloadProfileCsv = (): void => {
+  const profiles = getProfilesByGroupId(profilesStore.profiles, props.groupId);
+  const csvRows = [
+    ["所属", "名前", "段級位"],
+    ...profiles.map(p => [p.organization, p.name, p.rank.name])
+  ];
 
+  const csvContent = csvRows.map(e => e.join(",")).join("\n");
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+
+  const link = document.createElement("a");
+  link.href = url;
+  link.setAttribute("download", `group${props.groupId}_profiles.csv`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+/**
+ * csvのアップロードを実施する
+ */
+const uploadProfileCsv = (): void => {
+  const input = document.createElement("input");
+  input.type = "file";
+  input.accept = ".csv";
+
+  input.onchange = (event: Event) => {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const text = e.target?.result as string;
+      const lines = text.split("\n").map(line => line.trim()).filter(Boolean);
+
+      const [, ...dataLines] = lines; // ヘッダー除外
+      const newProfiles: Profile[] = [];
+
+      let id = 1;
+      for (const line of dataLines) {
+        const [organization, name, rankName] = line.split(",");
+
+        // 段級位オブジェクトを rankOptions から探す
+        const matchedRank = rankOptions.find(opt => opt.name === rankName?.trim());
+        if (!matchedRank) continue;
+
+        const newProfile = new Profile(props.groupId, id++, organization.trim(), name.trim(), matchedRank);
+        newProfiles.push(newProfile);
+      }
+
+      // Storeに反映
+      profilesStore.profiles = [
+        ...profilesStore.profiles.filter(p => p.group_id !== props.groupId),
+        ...newProfiles
+      ];
+
+      $toast.success("CSVの読み込みに成功しました！", { position: "top" });
+    };
+    reader.readAsText(file);
+  };
+
+  input.click();
+}
 </script>
 <template>
   <div class="list">
@@ -77,8 +142,34 @@ const getProfilesByGroupId = (profiles: Profile[], groupId: number): Profile[] =
       </v-col>
       <v-spacer></v-spacer>
       <v-col cols="2" class="justify-end">
-        <v-btn class="register-botton bg-green-darken-1 text-white text-body-1" variant="text" @click="dialog = true">
-          参加者の登録
+        <v-btn 
+          class="download-botton text-white text-body-1" 
+          prepend-icon="mdi-tray-arrow-down"
+          color="green-darken-1"
+          variant="outlined"
+          text="ダウンロード" 
+          @click="downloadProfileCsv"
+        >
+        </v-btn>
+      </v-col>
+      <v-col cols="2" class="justify-end">
+        <v-btn 
+          class="upload-botton text-white text-body-1" 
+          prepend-icon="mdi-tray-arrow-up"
+          color="green-darken-1"
+          variant="outlined" 
+          text="アップロード" 
+          @click="uploadProfileCsv"
+        >
+        </v-btn>
+      </v-col>
+      <v-col cols="2" class="justify-end">
+        <v-btn 
+          class="register-botton bg-green-darken-1 text-white text-body-1" 
+          variant="text" 
+          text="参加者の登録" 
+          @click="dialog = true"
+        >
         </v-btn>
       </v-col>
       <v-dialog v-model="dialog" width="auto">
@@ -89,8 +180,18 @@ const getProfilesByGroupId = (profiles: Profile[], groupId: number): Profile[] =
           </v-card-text>
           <v-divider></v-divider>
           <template v-slot:actions>
-            <v-btn class="bg-grey-lighten-2" text="キャンセル" @click="dialog = false"></v-btn>
-            <v-btn class="bg-green-darken-1 text-white" text="登録する" @click="registerPlayers()"></v-btn>
+            <v-btn 
+              class="bg-grey-lighten-2" 
+              text="キャンセル" 
+              @click="dialog = false"
+            >
+            </v-btn>
+            <v-btn 
+              class="bg-green-darken-1 text-white" 
+              text="登録する" 
+              @click="registerPlayers()"
+            >
+            </v-btn>
           </template>
         </v-card>
       </v-dialog>
@@ -105,7 +206,11 @@ const getProfilesByGroupId = (profiles: Profile[], groupId: number): Profile[] =
         </tr>
       </thead>
       <tbody class="list-table-body">
-        <tr v-for="(profile, index) in getProfilesByGroupId(profilesStore.profiles, props.groupId)" :key="profile.id" :class="{'bg-grey-lighten-3':  index % 2 !== 0}">
+        <tr 
+          v-for="(profile, index) in getProfilesByGroupId(profilesStore.profiles, props.groupId)" 
+          :key="profile.id" 
+          :class="[index % 2 === 0 ? 'bg-white' : 'bg-grey-lighten-3']"
+        >
           <td>{{ index + 1 }}</td>
           <td>
             <v-text-field v-model="profile.organization" variant="underlined" density="compact" maxlength="30"
@@ -129,6 +234,8 @@ const getProfilesByGroupId = (profiles: Profile[], groupId: number): Profile[] =
 </template>
 <style>
 @media print {
+  .download-botton ,
+  .upload-botton ,
   .register-botton {
     display: none !important;
   }
@@ -149,6 +256,11 @@ const getProfilesByGroupId = (profiles: Profile[], groupId: number): Profile[] =
   table-layout: fixed;
   text-align: center;
   margin: auto;
+  border-right: 1px solid #BDBDBD;
+  border-left: 1px solid #BDBDBD;
+  border-bottom: 1px solid #BDBDBD;
+  box-shadow: 0 0 2px 0 #757575;
+  border-radius: 8px;
 }
 .list-table-header th {
   /* ヘッダーを画面上部の位置で固定 */
@@ -157,10 +269,10 @@ const getProfilesByGroupId = (profiles: Profile[], groupId: number): Profile[] =
   top: 65px;
   z-index: 1;
   padding: .5em;
-  border-top: 2px solid #388E3C;
-  border-bottom: 2px solid #388E3C;
-  color: #388E3C;
-  background-color: #fff;
+  border-top: 2px solid #66BB6A;
+  border-bottom: 2px solid #66BB6A;
+  color: #FFFFFF;
+  background-color: #66BB6A;
 }
 .list-table-body th,
 .list-table-body td {
@@ -190,5 +302,17 @@ const getProfilesByGroupId = (profiles: Profile[], groupId: number): Profile[] =
   color: #ff4b00;
   vertical-align: top;
   font-size: x-small;
+}
+.list-table-header tr:first-child th:first-child {
+  border-top-left-radius: 8px;
+}
+.list-table-header tr:first-child th:last-child {
+  border-top-right-radius: 8px;
+}
+.list-table-body tr:last-child td:first-child {
+  border-bottom-left-radius: 8px;
+}
+.list-table-body tr:last-child td:last-child {
+  border-bottom-right-radius: 8px;
 }
 </style>

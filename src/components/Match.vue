@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { reactive, watch } from 'vue'
 import 'vue-toast-notification/dist/theme-sugar.css';
 import { useToast } from 'vue-toast-notification';
+import EmptyArea from '@/components/EmptyArea.vue'
 import { playerUtil } from "@/utils/playerUtil";
 import { usePlayerStore } from "@/stores/playerStore";
 import { resultOptions } from "@/constants/resultOptions";
@@ -9,13 +10,16 @@ import { roundOptions } from "@/constants/roundOptions";
 import { Player } from "@/models/player";
 import { Result } from "@/models/result";
 import { Match } from "@/models/match";
-import type { Round } from "@/types/round";
+import { Round } from "@/models/round";
 const props = defineProps<{
   groupId: number,
 }>();
+const state = reactive({
+  selectedRound: new Round("1回戦", 1 ),
+});
 const playerStore = usePlayerStore();
 const $toast = useToast();
-const selectedRound = ref<Round>({ value: 1 });
+const playersByGroupId = playerUtil.getNotEmptyPlayers(playerUtil.getPlayersByGroupId(playerStore.players, props.groupId))
 watch(playerStore.players, (newPlayers) => {
   playerUtil.updatePlayerMatchScore(newPlayers, props.groupId);
 },
@@ -43,7 +47,7 @@ const getResultClass = (result: Result): string => {
  * セレクトボックスで選択した回戦に対して、対戦相手をマッチさせる
  */
 const setOpponent = (): void => {
-  const round = selectedRound.value.value;
+  const round = state.selectedRound.value;
   const players = playerUtil.getPlayersByGroupId(playerStore.players, props.groupId)
     .filter(p => p.profile.name.trim() !== "")
     .sort((a, b) => b.points - a.points);
@@ -136,99 +140,129 @@ const onResultChange = (match: Match, currentRound: number, ownPlayerIndex: numb
         <h2 class="headline"><b>対戦表</b></h2>
       </v-col>
       <v-spacer></v-spacer>
-      <v-col cols="1" class="justify-end">
-        <v-select class="round-select" v-model="selectedRound" label="○回戦" :items="roundOptions" item-title="value"
-          item-value="value" return-object variant="underlined">
+      <v-col cols="2" class="justify-end">
+        <v-select
+          v-if="playersByGroupId.length > 1"
+          class="round-select"
+          v-model="state.selectedRound"
+          label="設定対象"
+          :items="roundOptions"
+          item-title=name
+          item-value="value" 
+          return-object variant="underlined"
+        >
         </v-select>
       </v-col>
       <v-col cols="2" class="justify-end">
-        <v-btn class="setting-botton bg-green-darken-1 text-white text-body-1" variant="text" @click="setOpponent">
+        <v-btn
+          v-if="playersByGroupId.length > 1"
+          class="setting-button bg-green-darken-1 text-white text-body-1"
+          variant="text"
+          @click="setOpponent"
+        >
           対戦相手の設定
         </v-btn>
-       </v-col>
-     </v-row>
-    <table class="home-table-design">
-      <thead class="home-table-header">
-        <tr>
-          <th rowspan="2">No</th>
-          <th rowspan="2">名前</th>
-          <th rowspan="2">段級位</th>
-          <template v-for="round in roundOptions" :key="'round-' + round">
-            <th colspan="2" class="table-header-match">{{ round.value }}回戦</th>
-            <th style="display:none"></th>
-          </template>
-          <th rowspan="2">勝点</th>
-          <th rowspan="2">
-            SOS
-            <sup>
-              <v-tooltip location="top"
-                text="Sum of Opponents Scores（対戦相手の勝ち星の数）">
-                <template v-slot:activator="{ props }">
-                  <v-icon v-bind="props" opacity="60%" size="x-small" icon="mdi-information-outline" class="information-icon"></v-icon>
-                </template>
-              </v-tooltip>
-            </sup>
-          </th>
-          <th rowspan="2">
-            SODOS
-            <sup>
-              <v-tooltip location="top"
-                text="Sum of Defeated Opponents Scores（負かした対戦相手の勝ち星の数）">
-                <template v-slot:activator="{ props }">
-                  <v-icon v-bind="props" opacity="60%" size="x-small" icon="mdi-information-outline" class="information-icon"></v-icon>
-                </template>
-              </v-tooltip>
-            </sup>
-          </th>
-          <th rowspan="2">順位</th>
-        </tr>
-        <tr>
-          <template v-for="round in roundOptions" :key="'result-' + round">
-            <th class="home-table-header-match">相手</th>
-            <th class="home-table-header-match">結果</th>
-          </template>
-        </tr>
-      </thead>
-      <tbody class="home-table-body">
-        <tr v-for="(player, index) in playerUtil.getPlayersByGroupId(playerStore.players, props.groupId)" :key="player.profile.id" :class="{'bg-grey-lighten-3':  index % 2 !== 0}">
-          <td>{{ index + 1 }}</td>
-          <td class="home-table-body-name">{{ player.profile.name }}</td>
-          <td>{{ player.profile.rank.name }}</td>
-          <template v-for="(match, round) in player.matches" :key="'match-' + index">
-            <td class="home-table-body-matches-opponent" :class="getResultClass(match.result)">
-              <v-text-field v-model="match.opponentId" variant="underlined" density="compact"></v-text-field>
-            </td>
-            <td class="home-table-body-matches-result" :class="getResultClass(match.result)">
-              <v-select v-model="match.result" :items="resultOptions" item-title="name" item-value="value"
-                variant="underlined" return-object density="compact"
-                @update:modelValue="onResultChange(match, round, index)">
-              </v-select>
-            </td>
-          </template>
-          <template v-if="player.profile.name !== ''">
-            <td> {{ player.points }} </td>
-            <td> {{ player.sos }} </td>
-            <td> {{ player.sodos }} </td>
-            <td> {{ player.ranking }} </td>
-          </template>
-          <template v-else>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-          </template>
-        </tr>
-      </tbody>
-    </table>
+      </v-col>
+    </v-row>
+    <template v-if="playersByGroupId.length > 1">
+      <table class="home-table-design">
+        <thead class="home-table-header">
+          <tr>
+            <th rowspan="2">No</th>
+            <th rowspan="2">名前</th>
+            <th rowspan="2">段級位</th>
+            <template v-for="round in roundOptions" :key="'round-' + round">
+              <th colspan="2" class="table-header-match">{{ round.value }}回戦</th>
+              <th style="display:none"></th>
+            </template>
+            <th rowspan="2">勝点</th>
+            <th rowspan="2">
+              SOS
+              <sup>
+                <v-tooltip location="top"
+                  text="Sum of Opponents Scores（対戦相手の勝ち星の数）">
+                  <template v-slot:activator="{ props }">
+                    <v-icon v-bind="props" opacity="60%" size="x-small" icon="mdi-information-outline" class="information-icon"></v-icon>
+                  </template>
+                </v-tooltip>
+              </sup>
+            </th>
+            <th rowspan="2">
+              SODOS
+              <sup>
+                <v-tooltip location="top"
+                  text="Sum of Defeated Opponents Scores（負かした対戦相手の勝ち星の数）">
+                  <template v-slot:activator="{ props }">
+                    <v-icon v-bind="props" opacity="60%" size="x-small" icon="mdi-information-outline" class="information-icon"></v-icon>
+                  </template>
+                </v-tooltip>
+              </sup>
+            </th>
+            <th rowspan="2">順位</th>
+          </tr>
+          <tr>
+            <template v-for="round in roundOptions" :key="'result-' + round">
+              <th class="home-table-header-match">相手</th>
+              <th class="home-table-header-match">結果</th>
+            </template>
+          </tr>
+        </thead>
+        <tbody class="home-table-body">
+          <tr 
+            v-for="(player, index) in playersByGroupId" 
+            :key="player.profile.id" 
+            :class="[index % 2 === 0 ? 'bg-white' : 'bg-grey-lighten-3']"
+          >
+            <td>{{ index + 1 }}</td>
+            <td class="home-table-body-name">{{ player.profile.name }}</td>
+            <td>{{ player.profile.rank.name }}</td>
+            <template v-for="(match, round) in player.matches" :key="'match-' + index">
+              <td class="home-table-body-matches-opponent" :class="getResultClass(match.result)">
+                <v-text-field v-model="match.opponentId" variant="underlined" density="compact"></v-text-field>
+              </td>
+              <td class="home-table-body-matches-result" :class="getResultClass(match.result)">
+                <v-select v-model="match.result" :items="resultOptions" item-title="name" item-value="value"
+                  variant="underlined" return-object density="compact"
+                  @update:modelValue="onResultChange(match, round, index)">
+                </v-select>
+              </td>
+            </template>
+            <template v-if="player.profile.name !== ''">
+              <td> {{ player.points }} pt</td>
+              <td> {{ player.sos }} pt </td>
+              <td> {{ player.sodos }} pt </td>
+              <td> {{ player.ranking }} 位 </td>
+            </template>
+            <template v-else>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+            </template>
+          </tr>
+        </tbody>
+      </table>
+    </template>
+    <template v-else>
+      <EmptyArea 
+        :group-id="props.groupId"
+        icon-name="mdi-sword-cross">
+      </EmptyArea>
+    </template>
   </div>
 </template>
 <style>
 @media print {
-  .setting-botton,
+  .setting-button,
   .round-select,
-  .information-icon {
+  .information-icon,
+  .empty-player-button {
     display: none !important;
   }
+}
+.round-select {
+  margin-left: 70px;
+  width:90px;
 }
 .headline {
   padding: .1em .1em .1em .5em;
@@ -247,6 +281,11 @@ const onResultChange = (match: Match, currentRound: number, ownPlayerIndex: numb
   min-width: 1000px;
   text-align: center;
   margin: auto;
+  border-right: 1px solid #BDBDBD;
+  border-left: 1px solid #BDBDBD;
+  border-bottom: 1px solid #BDBDBD;
+  box-shadow: 0 0 2px 0 #757575;
+  border-radius: 8px;
 }
 .home-table-header th {
   /* ヘッダーを画面上部の位置で固定 */
@@ -255,10 +294,10 @@ const onResultChange = (match: Match, currentRound: number, ownPlayerIndex: numb
   top: 65px;
   z-index: 1;
   padding: .5em;
-  border-top: 2px solid #388E3C;
-  border-bottom: 2px solid #388E3C;
-  color: #388E3C;
-  background-color: #fff;
+  border-top: 2px solid #66BB6A;
+  border-bottom: 2px solid #66BB6A;
+  color: #FFFFFF;
+  background-color: #66BB6A;
 }
 .home-table-header-match {
   /* 線の重なりを防ぐ */
@@ -289,5 +328,17 @@ const onResultChange = (match: Match, currentRound: number, ownPlayerIndex: numb
 }
 .result-draw {
   background-color: #FFF9C4; /* yellow-lighten-4 */
+}
+.home-table-header tr:first-child th:first-child {
+  border-top-left-radius: 8px;
+}
+.home-table-header tr:first-child th:last-child {
+  border-top-right-radius: 8px;
+}
+.home-table-body tr:last-child td:first-child {
+  border-bottom-left-radius: 8px;
+}
+.home-table-body tr:last-child td:last-child {
+  border-bottom-right-radius: 8px;
 }
 </style>

@@ -7,6 +7,8 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    Conf: typeof import('./src/components/Conf.vue')['default']
+    EmptyArea: typeof import('./src/components/EmptyArea.vue')['default']
     Header: typeof import('./src/components/Header.vue')['default']
     List: typeof import('./src/components/List.vue')['default']
     Match: typeof import('./src/components/Match.vue')['default']

@@ -21,8 +21,6 @@ function createWindow() {
     },
   })
 
-  win.setMaximumSize(1280, 1080);
-
   if (process.env.NODE_ENV === "development") {
     win.loadURL('http://localhost:3000');
     win.webContents.openDevTools();

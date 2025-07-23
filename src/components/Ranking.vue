@@ -3,32 +3,40 @@ import { computed } from 'vue'
 import { playerUtil } from "@/utils/playerUtil";
 import { util } from "@/utils/util";
 import { usePlayerStore } from "@/stores/playerStore";
-const props = defineProps<{
-  groupId: number,
-}>();
+import EmptyArea from '@/components/EmptyArea.vue'
+const props = defineProps<{ groupId: number }>();
 const playerStore = usePlayerStore();
+
 const filteredPlayers = computed(() => {
   const rankingSortedPlayers = playerUtil.getPlayersByGroupId(playerStore.players, props.groupId).slice().filter((player) => player.profile.name !== "");
   rankingSortedPlayers.sort((a, b) => b.rankingScore - a.rankingScore);
   return rankingSortedPlayers;
-})
+});
 
-/**
- * 順位に応じたクラス名を返却する
- * @param {number} ranking 勝敗の結果
- * @returns {string} クラス名
- */
-function getResultClass(ranking: number) {
-  if (!ranking) return "";
+function getRankingClass(ranking: number) {
   switch (ranking) {
-    case 1:
-      return "gold";
-    case 2:
-      return "silver";
-    case 3:
-      return "bronze";
-    default:
-      return "";
+    case 1: return "gold";
+    case 2: return "silver";
+    case 3: return "bronze";
+    default: return "";
+  }
+}
+
+function getIconClass(ranking: number) {
+  switch (ranking) {
+    case 1: return "mdi-crown";
+    case 2: return "mdi-medal";
+    case 3: return "mdi-trophy";
+    default: return "";
+  }
+}
+
+function getIconColorClass(ranking: number) {
+  switch (ranking) {
+    case 1: return "yellow-darken-1";
+    case 2: return "blue-grey-darken-1";
+    case 3: return "deep-orange-darken-4";
+    default: return "";
   }
 }
 
@@ -36,163 +44,90 @@ function isEmpty(target: string) {
   return util.isNullOrUndefined(target) || target.trim() === "";
 }
 </script>
+
 <template>
   <div class="ranking">
     <v-row class="ranking-header ma-1">
-      <v-col cols="3" class="justify-start ">
+      <v-col cols="3" class="justify-start">
         <h2 class="headline"><b>ランキング</b></h2>
       </v-col>
     </v-row>
 
     <template v-if="filteredPlayers.length > 0">
-      <div class="ranking-container">
-        <div class="top-ranking">
-          <div class="rank" :class="getResultClass(index + 1)"
-            v-for="(player, index) in filteredPlayers.filter((_, i) => i <= 2)" :key="player.profile.id"
-          >
-            <div class="topic-text1">
-              <div class="topic-line1">
-                <v-icon size="x-large" color="yellow-darken-1">mdi-crown</v-icon>
-              </div>
-              <div class="topic-line1">
-                <span class="top-rank-number">{{ index + 1 }} </span>
-              </div>
+      <div class="top-ranking-row">
+        <div v-for="(player, index) in filteredPlayers.filter((_, i) => i <= 2)"
+             :key="player.profile.id"
+             :class="['top-rank-card', getRankingClass(index + 1)]">
+          <div class="top-rank-points-label">{{ player.points }} pt</div>
+          <div class="rank-content">
+            <div class="rank-position">
+              <v-icon class="rank-icon" size="x-large" :color="getIconColorClass(index + 1)">{{ getIconClass(index + 1) }}</v-icon>
+              <span>{{ index + 1 }}位</span>
             </div>
-            <div class="topic-text2">
-              <div class="topic-line2">
-                <span class="top-rank-organization">{{ isEmpty(player.profile.organization) ? "　": player.profile.organization }}</span>
+            <div class="rank-info">
+              <div class="rank-name">{{ player.profile.name }}</div>
+              <div class="rank-organization text-grey-darken-2">{{ isEmpty(player.profile.organization) ? "　" : player.profile.organization }}</div>
+              <div class="top-rank-stats text-grey-darken-2">
+                SOS: {{ player.sos }} | SODOS: {{ player.sodos }}
               </div>
-              <div class="topic-line2">
-                <span class="top-rank-name">{{ player.profile.name }}</span>
-              </div>
-            </div>
-            <div class="topic-text3">
-              <span class="top-rank-point">{{ player.points + "pt" }}</span>
-            </div>
-          </div>
-          <div class="rank other" 
-            v-for="(player, index) in filteredPlayers.filter((_, i) => i > 2 && i <= 7)" :key="player.profile.id"
-          >
-            <div class="topic-text1">
-              <div class="topic-line1">
-                <span class="rank-number">{{ index + 4 }} </span>
-              </div>
-            </div>
-            <div class="topic-text2">
-              <div class="topic-line">
-                <span class="rank-organization">{{ isEmpty(player.profile.organization) ? "　": player.profile.organization }}</span>
-              </div>
-              <div class="topic-line">
-                <span class="rank-name">{{ player.profile.name }}</span>
-              </div>
-            </div>
-            <div class="topic-text3">
-              {{ player.points + "pt" }}
-            </div>
-          </div>
-        </div>
-        <div class="other-ranking">
-          <div class="rank" v-for="(player, index) in filteredPlayers.filter((_, i) => i > 7)" :key="player.profile.id">
-            <div class="other-topic-text1">
-              <div class="other-topic-line1">
-                <span class="rank-number">{{ index + 9 }} </span>
-              </div>
-            </div>
-            <div class="other-topic-text2">
-              <div class="other-topic-line2">
-                <span class="rank-organization">{{ isEmpty(player.profile.organization) ? "　": player.profile.organization }}</span>
-              </div>
-              <div class="other-topic-line2">
-                <span class="rank-name">{{ player.profile.name }}</span>
-              </div>
-            </div>
-            <div class="other-topic-text3">
-              {{ player.points + "pt" }}
             </div>
           </div>
         </div>
       </div>
+      <div class="others-area">
+        <div
+          v-for="(player, index) in filteredPlayers.filter((_, i) => i > 2)"
+          :key="player.profile.id"
+          class="other-rank-card bg-white"
+        >
+          <div class="circle_number bg-grey-lighten-3">{{ index + 4 }}</div>
+          <div class="topic-text2">
+            <div class="topic-line2">
+              <div class="rank-name">{{ player.profile.name }}</div>
+            </div>
+            <div class="topic-line2">
+              <div class="rank-organization text-grey-darken-2">{{ player.profile.organization }}</div>
+            </div>
+          </div>
+          <div class="rank-stats text-grey-darken-2">SOS: {{ player.sos }} | SODOS: {{ player.sodos }}</div>
+          <div class="points-label">{{ player.points }} pt</div>
+        </div>
+      </div>
     </template>
     <template v-else>
-      <v-banner
-      class="my-4"
-      bg-color="green-lighten-5"
-      color="green-lighten-1"
-      icon="mdi-information"
-      lines="one"
-      >
-        <v-banner-text>
-          参加者を登録してください。
-        </v-banner-text>
-      </v-banner>
+      <EmptyArea :group-id="props.groupId" icon-name="mdi-trophy" />
     </template>
   </div>
 </template>
 
 <style>
-.text-h3 {
-  font-family: "游ゴシック", "メイリオ", "MSゴシック" !important;
+.ranking-header {
+  max-height: 60px;
 }
 .headline {
   padding: .1em .1em .1em .5em;
   border-left: solid .3em #388E3C;
 }
-.ranking-header {
-  max-height: 60px;
-}
-.ranking-container {
-  /* 横並び */
+.top-ranking-row {
   display: flex;
-  flex-direction: row;
-  background: #FFF;
-  padding: 20px;
-  min-width: 1000px;
+  justify-content: space-around;
+  padding: 20px 0;
+  gap: 10px;
 }
-.top-ranking {
-  /* 縦並び */
+.top-rank-card {
+  position: relative;
+  width: 32%;
+  padding: 15px;
+  border-radius: 10px;
+  box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.3);
+  color: #222;
   display: flex;
-  flex-direction: column;
-  width: 65%;
-  gap: 20px;
-  padding: 10px;
-}
-.topic-line1 {
-  display: flex;
-  justify-content: center;
-}
-.topic-text1 {
-  height: 100px;
-  line-height: 100px;
-  width: 15%;
-}
-.top-rank-number {
-  color:#424242;
-  font-weight: bold;
-  margin-top: -25px;
-}
-.topic-text2 {
-  display: flex;
-  flex-direction: column;
-  /* 左寄せ */
-  align-items: flex-start;
-  text-align: left;
-  width: 75%;
-}
-.topic-line2 {
-  display: flex;
-  flex-wrap: wrap;
-  /* 左寄せ */
   justify-content: flex-start;
-  width: 100%;
-}
-.topic-text3 {
-  height: 100px;
-  line-height: 100px;
-  width: 10%;
-}
-.top-rank-organization, .top-rank-name, .top-rank-point {
-  color:#424242;
-  font-weight: bold;
+  flex-direction: column;
+  text-align: left;
+  /* 最初は非表示 */
+  opacity: 0;
+  animation: fadeIn 1s ease-out forwards;
 }
 /* フェードインアニメーション */
 @keyframes fadeIn {
@@ -208,105 +143,146 @@ function isEmpty(target: string) {
     transform: translateY(0);
   }
 }
-.top-ranking .rank {
-  /* 横並び */
-  display: flex;
-  flex-direction: row;
-  /* 両端揃え */
-  justify-content: space-between;
-  font-size: 28px;
+.rank-position {
+  font-size: 20px;
   font-weight: bold;
-  padding: 15px;
-  border-radius: 10px;
-  color: #222;
-  /* 最初は非表示 */
-  opacity: 0;
-  animation: fadeIn 1s ease-out forwards;
-  border-radius: 5px;
-  box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.3);
+}
+.rank-icon {
+  vertical-align: -3px;
+}
+.rank-position > span{
+  margin: 10px;
+  font-size: 24px;
+  font-weight: bold;
+}
+.rank-info {
+  margin-top: 10px;
+}
+.rank-name {
+  font-weight: bold;
+  font-size: 24px;
+}
+.rank-organization {
+  font-size: 16px;
+  margin-top: 4px;
+}
+.top-rank-stats {
+  margin-top: 10px;
+  font-size: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 @media print {
   .gold {
-    background-color: #ffd700 !important;
-    background-image: linear-gradient(90deg, #FFF176, #FFF59D) !important;
+    background: linear-gradient(90deg, #fcf3a5, #faee7e);
+    background-image: linear-gradient(90deg, #fcf3a5, #faee7e)!important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
   .silver {
-    background-color: #c0c0c0 !important;
-    background-image: linear-gradient(90deg, #c0c0c0, #dcdcdc) !important;
+    background-color: linear-gradient(90deg, #e7e7e7, #cacaca);
+    background-image: linear-gradient(90deg, #e7e7e7, #cacaca)!important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
   .bronze {
-    background-color: #cd7f32 !important;
-    background-image: linear-gradient(90deg, #cd8339, #c48b57) !important;
+    background-color: linear-gradient(90deg, #f7bf87, #d39a65);
+    background-image: linear-gradient(90deg, #f7bf87, #d39a65)!important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
 }
 .gold {
-  background: linear-gradient(90deg, #FFF176, #FFF59D);
+  background: linear-gradient(90deg, #fcf3a5, #faee7e);
+  border: 1px solid #FFD600; /* yellow-accent-4 */
   animation-delay: 0.1s!important;
 }
 .silver {
-  background: linear-gradient(90deg, #c0c0c0, #dcdcdc);
+  background: linear-gradient(90deg, #e7e7e7, #cacaca);
+  border: 1px solid #B0BEC5; /* blue-grey-lighten-3 */
   animation-delay: 0.3s!important;
 }
 .bronze {
-  background: linear-gradient(90deg, #cd8339, #c48b57);
+  background: linear-gradient(90deg, #f7bf87, #d39a65);
+  border: 1px solid #FF8A65; /* deep-orange-darken-2 */
   animation-delay: 0.5s!important;
 }
-.other {
+.circle_number {
+  width: 40px;
+  height: 40px;
+  margin: 8px;
+  padding-top: 9px;
+  border-radius: 50%;
+  text-align: center;
+  box-sizing: border-box;
+  font-weight: bold;
+}
+.other-rank-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-radius: 5px;
+  border: 1px solid #BDBDBD;
+  box-shadow: 0 0 1px 0 #757575;
+  margin: 4px;
+  padding: 8px;
+  /* 最初は非表示 */
+  opacity: 0;
+  animation: fadeIn 1s ease-out forwards;
   animation-delay: 0.7s!important;
 }
-.other-ranking {
-  /* 縦並び */
-  display: flex;
-  flex-direction: column;
-  width: 35%;
-  gap: 5px;
-  padding: 15px;
+.topic-text1 {
+  height: 100px;
+  line-height: 100px;
+  width: 15%;
 }
-.other-ranking .rank {
-  /* 横並び */
-  display: flex;
-  flex-direction: row;
-  /* 両端揃え */
-  justify-content: space-between;
-  font-size: 16px;
-  padding: 8px;
-  background: #FFF;
-  border-radius: 5px;
-  box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.3);
-}
-.other-topic-line1 {
+.topic-line1 {
   display: flex;
   justify-content: center;
 }
-.other-topic-text1 {
-  height: 50px;
-  line-height: 50px;
-  width: 15%;
-}
-.other-topic-text2 {
+.topic-text2 {
   display: flex;
   flex-direction: column;
   /* 左寄せ */
   align-items: flex-start;
   text-align: left;
-  width: 75%;
+  width: 70%;
 }
-.other-topic-line2 {
+.topic-line2 {
   display: flex;
   flex-wrap: wrap;
   /* 左寄せ */
   justify-content: flex-start;
   width: 100%;
 }
-.other-topic-text3 {
-  height: 50px;
-  line-height: 50px;
-  width: 10%;
+
+.rank-content {
+  margin-top: 10px;
+}
+
+.top-rank-points-label {
+  position: absolute;
+  top: 30px;
+  right: 20px;
+  background-color: #81C784; /* 緑系 */
+  color: white;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: bold;
+}
+.rank-stats {
+  font-size: 16px;
+  margin:0 8px;
+}
+.points-label {
+  background-color: #81C784;
+  color: white;
+  padding: 4px 12px;
+  margin:0 8px;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: bold;
 }
 </style>

@@ -8,17 +8,17 @@ const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
-      path: '/',
+      path: '/:groupId',
       name: 'match',
       component: MatchView,
     },
     {
-      path: '/list',
+      path: '/list/:groupId',
       name: 'list',
       component: ListView,
     },
     {
-      path: '/ranking',
+      path: '/ranking/:groupId',
       name: 'ranking',
       component: RankingView,
     },
