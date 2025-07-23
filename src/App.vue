@@ -172,7 +172,7 @@ onMounted(async () => {
           </v-tabs>
         </v-col>
         <v-col cols="5" class="justify-start">
-          <v-chip class="ma-2 bg-red-lighten-3 text-white status-chip" variant="flat" label>
+          <v-chip v-if="state.isReady" class="ma-2 bg-red-lighten-3 text-white status-chip" variant="flat" label>
             <span class="ml-2"><v-icon class="status-icon" icon="mdi-account-group"/>{{ state.playerCount }}名参加</span>
             <span class="ml-2"><v-icon class="status-icon" icon="mdi-check-circle-outline"/>{{ state.status }} （全体: {{ state.allPlayerCount }}名）</span>
           </v-chip>
