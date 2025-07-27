@@ -8,23 +8,28 @@ import type { MatchDto } from "@/types/matchDto";
 import { useProfileStore } from "@/stores/profileStore";
 import { usePlayerStore } from "@/stores/playerStore";
 import { useTitleInfoStore } from "@/stores/titleInfoStore";
+import { useConfInfoStore } from "@/stores/confInfoStore";
 import { Profile } from "@/models/profile";
 import { Player } from "@/models/player";
+import { ConfInfo } from "@/models/confInfo";
 import { TitleInfo } from "@/models/titleInfo";
 import type { TitleInfoDto } from './types/titleInfoDto';
+import type { ConfInfoDto } from './types/confInfoDto';
 import { constant } from './constants/constant';
+import { confUtil } from '@/utils/confUtil';
 const router = useRouter();
 const route = useRoute();
 const profileStore = useProfileStore();
 const playerStore = usePlayerStore();
 const titleInfoStore = useTitleInfoStore();
+const confInfoStore = useConfInfoStore();
 const state = reactive({
   isReady: false,
   rail: true,
   tab: 0,
   playerCount: 0,
   allPlayerCount: 0,
-  status: ""
+  status: "",
 });
 watch(() => state.tab, (newTab) => {
   // 現在のページパスによって遷移先を分岐
@@ -64,9 +69,11 @@ onMounted(async () => {
   const profileDtoList: ProfileDto[] = await window.electronAPI.findAllProfiles();
   const matchDtoList: MatchDto[] = await window.electronAPI.findAllMatches();
   const titleInfoDtoList: TitleInfoDto[] = await window.electronAPI.findOneTitleInfo();
+  const confInfoDtoList: ConfInfoDto[] = await window.electronAPI.findAllConfInfo();
   console.log('profileDtoList:',profileDtoList);
   console.log('matchDtoList:',matchDtoList);
   console.log('titleInfoDtoList:',titleInfoDtoList);
+  console.log('confInfoDtoList:',confInfoDtoList);
 
   // DBに保存されているデータは初期表示時に画面に表示させる
   if (profileDtoList?.length >= 1) {
@@ -120,7 +127,9 @@ onMounted(async () => {
   } else {
     titleInfoStore.titleInfo = new TitleInfo("igo", "swiss-stage-project");
   }
-
+  if (confInfoDtoList?.length >= 1) {
+    confInfoStore.confInfo = confInfoDtoList.map(info => (new ConfInfo(info.key, info.value)));
+  }
   state.isReady = true;
   state.tab = 1;
   router.push(`/${state.tab}`);
@@ -161,14 +170,15 @@ onMounted(async () => {
             v-model="state.tab"
             class="tabs"
           >
-            <v-tab :value=1 slider-color='green-darken-1' color='green-darken-1'>Group 1</v-tab>
-            <v-tab :value=2 slider-color='green-darken-1' color='green-darken-1'>Group 2</v-tab>
-            <v-tab :value=3 slider-color='green-darken-1' color='green-darken-1'>Group 3</v-tab>
-            <v-tab :value=4 slider-color='green-darken-1' color='green-darken-1'>Group 4</v-tab>
-            <v-tab :value=5 slider-color='green-darken-1' color='green-darken-1'>Group 5</v-tab>
-            <v-tab :value=6 slider-color='green-darken-1' color='green-darken-1'>Group 6</v-tab>
-            <v-tab :value=7 slider-color='green-darken-1' color='green-darken-1'>Group 7</v-tab>
-            <v-tab :value=8 slider-color='green-darken-1' color='green-darken-1'>Group 8</v-tab>
+            <v-tab
+              v-for="group in Number(confUtil.getValue(confInfoStore.confInfo, 'group_count'))"
+              :key="group"
+              :value="group"
+              slider-color="green-darken-1"
+              color="green-darken-1"
+            >
+              Group {{ group }}
+            </v-tab>
           </v-tabs>
         </v-col>
         <v-col cols="5" class="justify-start">

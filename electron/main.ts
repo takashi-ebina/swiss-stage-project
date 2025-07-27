@@ -7,6 +7,7 @@ import util from 'node:util';
 import type { ProfileDto } from '../src/types/profileDto';
 import type { MatchDto } from '../src/types/matchDto';
 import type { TitleInfoDto } from '../src/types/titleInfoDto';
+import type { ConfInfoDto } from '../src/types/confInfoDto';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -89,6 +90,17 @@ ipcMain.handle('find-one-title-info', async () => {
   return result;
 })
 
+ipcMain.handle('find-all-conf-info', async () => {
+  console.log("[START] find-all-conf-info");
+  const db = new sqlite3.Database(getDbPath());
+  const result = await util.promisify(  
+    db.all.bind(db, 'select key, value from conf_info order by key')
+  ).call(db) as ConfInfoDto[];
+  await util.promisify(db.close).call(db);
+  console.log("[ END ] find-all-conf-info");
+  return result;
+})
+
 ipcMain.handle('init-db', async () => {
   console.log("[START] init-db");
   const db = new sqlite3.Database(getDbPath());
@@ -101,6 +113,9 @@ ipcMain.handle('init-db', async () => {
     );
     await util.promisify(db.run).call(
       db,"create table if not exists title_info (logo_name text, title text)"
+    );
+    await util.promisify(db.run).call(
+      db,"create table if not exists conf_info (key text, value text)"
     );
   } catch (err) {
     console.error('DB error:', err);
@@ -158,6 +173,27 @@ ipcMain.handle('save-title-info', async (_event, titleInfoDto: TitleInfoDto) => 
   }
 })
 
+ipcMain.handle('save-conf-info', async (_event, confInfoDto: ConfInfoDto[]) => {
+  console.log("[START] save-conf-info");
+  console.log("[SAVE] confInfoDto:", confInfoDto);
+  const db = new sqlite3.Database(getDbPath());
+  try {
+    const confInfoInsertStatement = db.prepare("INSERT INTO conf_info VALUES (?,?)");
+    for (const item of confInfoDto) {
+      await util.promisify(confInfoInsertStatement.run
+        .bind(confInfoInsertStatement, [item.key, item.value]))
+        .call(confInfoInsertStatement);
+    }
+    await util.promisify(confInfoInsertStatement.finalize).call(confInfoInsertStatement);
+  } catch (err) {
+    console.error('DB error:', err);
+    throw err;
+  } finally {
+    console.log("[ END ] save-conf-info");
+    await util.promisify(db.close).call(db);
+  }
+})
+
 ipcMain.handle('delete', async () => {
   console.log("[START] delete");
   const db = new sqlite3.Database(getDbPath());
@@ -170,6 +206,9 @@ ipcMain.handle('delete', async () => {
     );
     await util.promisify(db.run).call(
       db,"delete from title_info"
+    );
+    await util.promisify(db.run).call(
+      db,"delete from conf_info"
     );
   } catch (err) {
     console.error('DB error:', err);
