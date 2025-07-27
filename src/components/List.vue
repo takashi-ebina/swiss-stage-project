@@ -141,40 +141,36 @@ const uploadProfileCsv = (): void => {
         <h2 class="headline"><b>参加者一覧</b></h2>
       </v-col>
       <v-spacer></v-spacer>
-      <v-col cols="2" class="justify-end">
+      <v-col cols="5" class="justify-end">
         <v-btn 
-          class="download-botton text-white text-body-1" 
+          class="download-botton text-white text-body-1 ma-1" 
           prepend-icon="mdi-tray-arrow-down"
           color="green-darken-1"
           variant="outlined"
-          text="ダウンロード" 
+          text="CSV出力" 
           @click="downloadProfileCsv"
         >
         </v-btn>
-      </v-col>
-      <v-col cols="2" class="justify-end">
         <v-btn 
-          class="upload-botton text-white text-body-1" 
+          class="upload-botton text-white text-body-1 ma-1" 
           prepend-icon="mdi-tray-arrow-up"
           color="green-darken-1"
           variant="outlined" 
-          text="アップロード" 
+          text="CSV取込" 
           @click="uploadProfileCsv"
         >
         </v-btn>
-      </v-col>
-      <v-col cols="2" class="justify-end">
         <v-btn 
-          class="register-botton bg-green-darken-1 text-white text-body-1" 
+          class="register-botton bg-green-darken-1 text-white text-body-1 ma-1" 
           variant="text" 
-          text="参加者の登録" 
+          text="参加者登録" 
           @click="dialog = true"
         >
         </v-btn>
       </v-col>
       <v-dialog v-model="dialog" width="auto">
         <v-card width="500">
-          <v-card-title class="daialog-title">参加者の登録</v-card-title>
+          <v-card-title class="daialog-title">参加者登録</v-card-title>
           <v-card-text>
             対戦表の結果がリセットされますが問題ないですか？
           </v-card-text>

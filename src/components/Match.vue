@@ -3,8 +3,10 @@ import { reactive, watch } from 'vue'
 import 'vue-toast-notification/dist/theme-sugar.css';
 import { useToast } from 'vue-toast-notification';
 import EmptyArea from '@/components/EmptyArea.vue'
+import { confUtil } from '@/utils/confUtil';
 import { playerUtil } from "@/utils/playerUtil";
 import { usePlayerStore } from "@/stores/playerStore";
+import { useConfInfoStore } from "@/stores/confInfoStore";
 import { resultOptions } from "@/constants/resultOptions";
 import { roundOptions } from "@/constants/roundOptions";
 import { Player } from "@/models/player";
@@ -18,6 +20,7 @@ const state = reactive({
   selectedRound: new Round("1回戦", 1 ),
 });
 const playerStore = usePlayerStore();
+const confInfoStore = useConfInfoStore();
 const $toast = useToast();
 const playersByGroupId = playerUtil.getNotEmptyPlayers(playerUtil.getPlayersByGroupId(playerStore.players, props.groupId))
 watch(playerStore.players, (newPlayers) => {
@@ -160,7 +163,7 @@ const onResultChange = (match: Match, currentRound: number, ownPlayerIndex: numb
           variant="text"
           @click="setOpponent"
         >
-          対戦相手の設定
+          対戦相手設定
         </v-btn>
       </v-col>
     </v-row>
@@ -171,8 +174,8 @@ const onResultChange = (match: Match, currentRound: number, ownPlayerIndex: numb
             <th rowspan="2">No</th>
             <th rowspan="2">名前</th>
             <th rowspan="2">段級位</th>
-            <template v-for="round in roundOptions" :key="'round-' + round">
-              <th colspan="2" class="table-header-match">{{ round.value }}回戦</th>
+            <template v-for="roundIndex in Number(confUtil.getValue(confInfoStore.confInfo, 'match_count'))" :key="'round-' + roundIndex">
+              <th colspan="2" class="table-header-match">{{ roundOptions[roundIndex - 1].value }}回戦</th>
               <th style="display:none"></th>
             </template>
             <th rowspan="2">勝点</th>
@@ -201,7 +204,7 @@ const onResultChange = (match: Match, currentRound: number, ownPlayerIndex: numb
             <th rowspan="2">順位</th>
           </tr>
           <tr>
-            <template v-for="round in roundOptions" :key="'result-' + round">
+            <template v-for="roundIndex in Number(confUtil.getValue(confInfoStore.confInfo, 'match_count'))" :key="'result-' + roundIndex">
               <th class="home-table-header-match">相手</th>
               <th class="home-table-header-match">結果</th>
             </template>
@@ -217,15 +220,17 @@ const onResultChange = (match: Match, currentRound: number, ownPlayerIndex: numb
             <td class="home-table-body-name">{{ player.profile.name }}</td>
             <td>{{ player.profile.rank.name }}</td>
             <template v-for="(match, round) in player.matches" :key="'match-' + index">
-              <td class="home-table-body-matches-opponent" :class="getResultClass(match.result)">
-                <v-text-field v-model="match.opponentId" variant="underlined" density="compact"></v-text-field>
-              </td>
-              <td class="home-table-body-matches-result" :class="getResultClass(match.result)">
-                <v-select v-model="match.result" :items="resultOptions" item-title="name" item-value="value"
-                  variant="underlined" return-object density="compact"
-                  @update:modelValue="onResultChange(match, round, index)">
-                </v-select>
-              </td>
+              <template v-if="round < Number(confUtil.getValue(confInfoStore.confInfo, 'match_count'))">
+                <td class="home-table-body-matches-opponent" :class="getResultClass(match.result)">
+                  <v-text-field v-model="match.opponentId" variant="underlined" density="compact"></v-text-field>
+                </td>
+                <td class="home-table-body-matches-result" :class="getResultClass(match.result)">
+                  <v-select v-model="match.result" :items="resultOptions" item-title="name" item-value="value"
+                    variant="underlined" return-object density="compact"
+                    @update:modelValue="onResultChange(match, round, index)">
+                  </v-select>
+                </td>
+              </template>
             </template>
             <template v-if="player.profile.name !== ''">
               <td> {{ player.points }} pt</td>

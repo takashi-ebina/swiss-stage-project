@@ -1,16 +1,35 @@
 <script setup lang="ts">
-import { reactive } from 'vue'
+import { reactive, watch } from 'vue'
 import { validatorUtil } from '@/utils/validatorUtil';
+import { confUtil } from '@/utils/confUtil';
+import { ConfInfo } from '@/models/confInfo';
+import { groupSizeOptions } from '@/constants/groupSizeOptions';
+import { matchSizeOptions } from '@/constants/matchSizeOptions';
 import { useTitleInfoStore } from "@/stores/titleInfoStore";
+import { useConfInfoStore } from "@/stores/confInfoStore";
 const titleInfoStore = useTitleInfoStore();
+const confInfoStore = useConfInfoStore();
 const state = reactive({
   titleDialog: false,
   logoDialog: false,
+  groupDialog: false,
+  matchDialog: false,
   inputTitle: titleInfoStore.titleInfo.title,
+  inputLogoName: titleInfoStore.titleInfo.logoName,
+  inputGroupCount: confUtil.getValue(confInfoStore.confInfo, "group_count"),
+  inputMatchCount: confUtil.getValue(confInfoStore.confInfo, "match_count"),
   loading: false,
 });
 const getImageUrl = (logoName: string) => {
   return new URL(`/src/assets/${logoName}.svg`, import.meta.url).href
+}
+const setGroupCount = (inputGroupCount: string): void => {
+  confInfoStore.confInfo = confInfoStore.confInfo.filter(info => info.key !== "group_count");
+  confInfoStore.confInfo.push(new ConfInfo("group_count", inputGroupCount));
+}
+const setMatchCount = (inputMatchCount: string): void => {
+  confInfoStore.confInfo = confInfoStore.confInfo.filter(info => info.key !== "match_count");
+  confInfoStore.confInfo.push(new ConfInfo("match_count", inputMatchCount));
 }
 </script>
 <template>
@@ -18,7 +37,6 @@ const getImageUrl = (logoName: string) => {
     <v-row class="configuration-header ma-1">
       <v-col cols="3" class="justify-start">
         <h2 class="headline"><b>設定</b></h2>
-        <!-- タブの表示非表示、タブごとの回戦を指定する-->
       </v-col>
     </v-row>
     <v-banner
@@ -84,6 +102,58 @@ const getImageUrl = (logoName: string) => {
               </v-card>
             </v-dialog>
           </v-card-actions>
+        </v-card>
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col cols="4">
+        <v-card class="conf-card">
+          <v-card-title>グループ数</v-card-title>
+          <v-card-subtitle>グループ数を設定してください</v-card-subtitle>
+          <div class="conf-content d-flex align-center justify-center fill-height">
+            <span class="text-h4">{{ confUtil.getValue(confInfoStore.confInfo, "group_count") }}グループ</span>
+          </div>
+          <v-card-actions class="justify-end">
+            <v-btn @click="state.groupDialog = true" class="bg-green-darken-1 text-white">編集</v-btn>
+          </v-card-actions>
+          <v-dialog v-model="state.groupDialog" width="auto">
+            <v-card width="500">
+              <v-card-title class="daialog-title">グループ数の設定</v-card-title>
+              <v-sheet class="px-3">
+                <v-select class="ma-2" v-model="state.inputGroupCount" :items="groupSizeOptions" label="グループ数"></v-select>
+              </v-sheet>
+              <v-divider></v-divider>
+              <template v-slot:actions>
+                <v-btn class="bg-grey-lighten-2" text="キャンセル" @click="state.groupDialog = false;"></v-btn>
+                <v-btn class="bg-green-darken-1 text-white" text="登録する" @click="state.groupDialog = false; setGroupCount(state.inputGroupCount);"></v-btn>
+              </template>
+            </v-card>
+          </v-dialog>
+        </v-card>
+      </v-col>
+      <v-col cols="4">
+        <v-card class="conf-card">
+          <v-card-title>対戦数</v-card-title>
+          <v-card-subtitle>対戦数を設定してください</v-card-subtitle>
+          <div class="conf-content d-flex align-center justify-center fill-height">
+            <span class="text-h4">{{ confUtil.getValue(confInfoStore.confInfo, "match_count") }}回戦</span>
+          </div>
+          <v-card-actions class="justify-end">
+            <v-btn @click="state.matchDialog = true" class="bg-green-darken-1 text-white">編集</v-btn>
+          </v-card-actions>
+          <v-dialog v-model="state.matchDialog" width="auto">
+            <v-card width="500">
+              <v-card-title class="daialog-title">対戦数の設定</v-card-title>
+              <v-sheet class="px-3">
+                <v-select class="ma-2" v-model="state.inputMatchCount" :items="matchSizeOptions" label="対戦数"></v-select>
+              </v-sheet>
+              <v-divider></v-divider>
+              <template v-slot:actions>
+                <v-btn class="bg-grey-lighten-2" text="キャンセル" @click="state.matchDialog = false;"></v-btn>
+                <v-btn class="bg-green-darken-1 text-white" text="登録する" @click="state.matchDialog = false; setMatchCount(state.inputMatchCount);"></v-btn>
+              </template>
+            </v-card>
+          </v-dialog>
         </v-card>
       </v-col>
     </v-row>

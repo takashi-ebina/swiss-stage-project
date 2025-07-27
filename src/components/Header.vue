@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { reactive } from 'vue'
+import { useConfInfoStore } from "@/stores/confInfoStore";
 import { useTitleInfoStore } from "@/stores/titleInfoStore";
 import { useProfileStore } from "@/stores/profileStore";
 import { usePlayerStore } from "@/stores/playerStore";
@@ -7,11 +8,14 @@ import { useToast } from 'vue-toast-notification';
 import { excelUtil } from "@/utils/excelUtil";
 import { Player } from '@/models/player';
 import { Profile } from '@/models/profile';
+import { ConfInfo } from "@/models/confInfo";
 import { constant } from '@/constants/constant';
 import type { TitleInfoDto } from '@/types/titleInfoDto';
+import type { ConfInfoDto } from '@/types/confInfoDto';
 const state = reactive({
   loading: false,
 });
+const confInfoStore = useConfInfoStore();
 const titleInfoStore = useTitleInfoStore();
 const playerStore = usePlayerStore();
 const profileStore = useProfileStore();
@@ -30,6 +34,8 @@ const save = async () : Promise<void> => {
     }
     const titleInfoDto: TitleInfoDto = {logo_name: titleInfoStore.titleInfo.logoName, title: titleInfoStore.titleInfo.title};
     await window.electronAPI.saveTitleInfo(titleInfoDto);
+    const confInfoDto: ConfInfoDto[] = confInfoStore.confInfo.map(info => ({ key: info.key, value: info.value }));
+    await window.electronAPI.saveConfInfo(confInfoDto);
   } catch (err) {
     console.error('DB error:', err);
     $toast.error("保存に失敗しました", { position: "top" });
@@ -50,6 +56,7 @@ const reset = (): void => {
     Array.from({ length: constant.PLAYER_MAX_SIZE }, () => Player.fromGroupId(groupIdx))).flat();
   titleInfoStore.titleInfo.logoName = "igo";
   titleInfoStore.titleInfo.title = "swiss-stage-project";
+  confInfoStore.confInfo = [new ConfInfo("group_count", constant.GROUP_SIZE.toString()), new ConfInfo("match_count", constant.MATCH_SIZE.toString())];
 }
 const exportExcel = (): void => {
   excelUtil.exportExcel(playerStore.players, titleInfoStore.titleInfo.title);
